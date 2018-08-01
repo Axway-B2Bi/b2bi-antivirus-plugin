@@ -85,31 +85,31 @@ public class AntivirusConfigurationManager
 		try
 		{
 			Properties props = getPropertiesFromFile(pathToFile);
-
-			for (Map.Entry<Object, Object> entry : props.entrySet())
-			{
-				String key = (String)entry.getKey();
-				String value = (String)entry.getValue();
-				String[] splitKey = key.split("\\.");
-				if (splitKey.length < 2)
+			if (props != null)
+				for (Map.Entry<Object, Object> entry : props.entrySet())
 				{
-					throw new IllegalArgumentException(
-						"Key [" + key + "] inside " + AntivirusProcessor.getAvScannerConfFilePath()
-							+ " cannot be resolved.");
-				}
+					String key = (String)entry.getKey();
+					String value = (String)entry.getValue();
+					String[] splitKey = key.split("\\.");
+					if (splitKey.length < 2)
+					{
+						throw new IllegalArgumentException(
+							"Key [" + key + "] inside " + AntivirusProcessor.getAvScannerConfFilePath()
+								+ " cannot be resolved.");
+					}
 
-				scannerId = splitKey[0];
-				String propName = splitKey[1];
+					scannerId = splitKey[0];
+					String propName = splitKey[1];
 
-				AntivirusConfigurationHolder configurationHolder = avServersConfig.get(scannerId);
-				if (configurationHolder == null)
-				{
-					configurationHolder = new AntivirusConfigurationHolder();
-					configurationHolder.setScannerId(scannerId);
-					avServersConfig.put(scannerId, configurationHolder);
+					AntivirusConfigurationHolder configurationHolder = avServersConfig.get(scannerId);
+					if (configurationHolder == null)
+					{
+						configurationHolder = new AntivirusConfigurationHolder();
+						configurationHolder.setScannerId(scannerId);
+						avServersConfig.put(scannerId, configurationHolder);
+					}
+					configurationHolder.addProperty(propName, value);
 				}
-				configurationHolder.addProperty(propName, value);
-			}
 		}
 		catch (Exception e)
 		{
@@ -118,6 +118,7 @@ public class AntivirusConfigurationManager
 			throw new AntivirusException(message);
 		}
 	}
+
 	/**
 	 * Reads a properties file and returns a {@link Properties} object with the file's contents.
 	 */
@@ -143,14 +144,11 @@ public class AntivirusConfigurationManager
 			logger.error("The file \"" + propFile.getAbsolutePath() + "\" cannot be read!");
 			return null;
 		}
-		Properties props = new Properties();
-		InputStream is = null;
-		try
+
+		try (InputStream is = new FileInputStream(propFile))
 		{
-			is = new FileInputStream(propFile);
-
+			Properties props = new Properties();
 			props.load(is);
-
 			return props;
 		}
 		catch (IOException ioe)
@@ -160,25 +158,7 @@ public class AntivirusConfigurationManager
 			logger.error(message, ioe);
 			throw new Exception(message, ioe);
 		}
-		finally
-		{
-			if (is != null)
-			{
-				try
-				{
-					is.close();
-				}
-				catch (IOException ioe)
-				{
-					String errorString =
-						"Error while closing file \"" + propFile.getAbsolutePath() + "\" after reading it ("
-							+ ioe.getMessage() + ").";
-					logger.warn(errorString, ioe);
-				}
-			}
-		}
 	}
-
 
 	public Boolean getConfLoaded()
 	{

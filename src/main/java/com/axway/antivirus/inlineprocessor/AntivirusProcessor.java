@@ -43,7 +43,7 @@ public class AntivirusProcessor implements MessageProcessor
 		}
 	}
 
-	public AntivirusProcessor()
+	static
 	{
 		try
 		{
@@ -56,7 +56,7 @@ public class AntivirusProcessor implements MessageProcessor
 			logger.error("Can't get path to shared folder: " + ioex.getMessage());
 		}
 	}
-
+	
 	@Override
 	public void setParameters(String parameters)
 	{
