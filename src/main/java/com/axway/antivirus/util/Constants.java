@@ -41,6 +41,16 @@ public class Constants
 	public static final String SCANNER_CONFIGURATION_PROPERTY_PREVIEW_SIZE = "previewSize";
 
 	/**
+	 * <code>SCANNERID&gt;.stdReceiveLength</code> property inside the antivirus-scanners.properties file
+	 */
+	public static final String SCANNER_CONFIGURATION_PROPERTY_STANDARD_RECEIVE_LENGTH = "stdReceiveLength";
+
+	/**
+	 * <code>SCANNERID&gt;.stdSendLength</code> property inside the antivirus-scanners.properties file
+	 */
+	public static final String SCANNER_CONFIGURATION_PROPERTY_STANDARD_SEND_LENGTH = "stdSendLength";
+
+	/**
 	 * <code>SCANNERID&gt;.connectiontimeout</code> property inside the antivirus-scanners.properties file
 	 */
 	public static final String SCANNER_CONFIGURATION_PROPERTY_CONNECTION_TIMEOUT = "connectionTimeout";

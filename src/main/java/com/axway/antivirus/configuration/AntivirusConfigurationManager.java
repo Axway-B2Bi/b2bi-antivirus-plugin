@@ -2,6 +2,7 @@ package com.axway.antivirus.configuration;
 
 import com.axway.antivirus.exceptions.AntivirusException;
 import com.axway.antivirus.inlineprocessor.AntivirusProcessor;
+import com.axway.util.StringUtil;
 
 import org.apache.log4j.Logger;
 
@@ -10,8 +11,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 public class AntivirusConfigurationManager
 {
@@ -85,11 +88,13 @@ public class AntivirusConfigurationManager
 		try
 		{
 			Properties props = getPropertiesFromFile(pathToFile);
+			avServersConfig.clear();
 			if (props != null)
+			{
+				Set<String> scannerIds = new HashSet<>();
 				for (Map.Entry<Object, Object> entry : props.entrySet())
 				{
 					String key = (String)entry.getKey();
-					String value = (String)entry.getValue();
 					String[] splitKey = key.split("\\.");
 					if (splitKey.length < 2)
 					{
@@ -97,19 +102,43 @@ public class AntivirusConfigurationManager
 							"Key [" + key + "] inside " + AntivirusProcessor.getAvScannerConfFilePath()
 								+ " cannot be resolved.");
 					}
-
-					scannerId = splitKey[0];
-					String propName = splitKey[1];
-
-					AntivirusConfigurationHolder configurationHolder = avServersConfig.get(scannerId);
-					if (configurationHolder == null)
-					{
-						configurationHolder = new AntivirusConfigurationHolder();
-						configurationHolder.setScannerId(scannerId);
-						avServersConfig.put(scannerId, configurationHolder);
-					}
-					configurationHolder.addProperty(propName, value);
+					scannerIds.add(splitKey[0]);
 				}
+				for (String id : scannerIds)
+				{
+					AntivirusConfigurationHolder antivirusConfigurationHolder = new AntivirusConfigurationHolder();
+					antivirusConfigurationHolder.setScannerId(id);
+					for (Map.Entry<Object, Object> entry : props.entrySet())
+					{
+						String key = (String)entry.getKey();
+						String[] splitKey = key.split("\\.");
+						if (splitKey[0].equalsIgnoreCase(id))
+						{
+							String value = (String)entry.getValue();
+							antivirusConfigurationHolder.addProperty(splitKey[1], value);
+						}
+					}
+					//check if the mandatory fields exist in the property files
+					if (StringUtil.isNullEmptyOrBlank(antivirusConfigurationHolder.getHostname())
+						|| 0 == antivirusConfigurationHolder.getPort()
+						|| StringUtil.isNullEmptyOrBlank(antivirusConfigurationHolder.getService())
+						|| StringUtil.isNullEmptyOrBlank(antivirusConfigurationHolder.getServerVersion())
+						|| 0 == antivirusConfigurationHolder.getPreviewSize()
+						|| 0 == antivirusConfigurationHolder.getConnectionTimeout()
+						|| 0 == antivirusConfigurationHolder.getStdSendLength()
+						|| 0 == antivirusConfigurationHolder.getStdReceiveLength())
+					{
+						logger.error("Mandatory fields missing. Please verify the properties file.");
+						throw new AntivirusException("Mandatory fields missing. Please verify the properties file.");
+					}
+					else
+					{
+						scannerId = id;
+						avServersConfig.put(id, antivirusConfigurationHolder);
+					}
+				}
+
+			}
 		}
 		catch (Exception e)
 		{

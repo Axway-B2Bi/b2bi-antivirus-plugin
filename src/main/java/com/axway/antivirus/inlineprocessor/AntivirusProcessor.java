@@ -56,7 +56,7 @@ public class AntivirusProcessor implements MessageProcessor
 			logger.error("Can't get path to shared folder: " + ioex.getMessage());
 		}
 	}
-	
+
 	@Override
 	public void setParameters(String parameters)
 	{
@@ -86,6 +86,7 @@ public class AntivirusProcessor implements MessageProcessor
 			{
 				message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.ERROR.getValue());
 				message.reject("Antivirus configuration file is corrupt; check logs for more details.");
+				logger.error("Antivirus configuration file is corrupt; message will be rejected.");
 				return;
 			}
 			logger.info("Antivirus configuration: " + avConfHolder.toString());
@@ -95,7 +96,7 @@ public class AntivirusProcessor implements MessageProcessor
 				return;
 
 			//instantiate the ICAP client based on the scanner configuration
-			AntivirusClient client = new AntivirusClient(avConfHolder.getHostname(), avConfHolder.getPort(), avConfHolder.getService(), avConfHolder.getServerVersion(), avConfHolder.getPreviewSize(), avConfHolder.getConnectionTimeout());
+			AntivirusClient client = new AntivirusClient(avConfHolder.getHostname(), avConfHolder.getPort(), avConfHolder.getService(), avConfHolder.getServerVersion(), avConfHolder.getPreviewSize(), avConfHolder.getStdReceiveLength(), avConfHolder.getStdSendLength(), avConfHolder.getConnectionTimeout());
 
 			//connect to the ICAP client and ask server for OPTIONS
 			client.connect();
@@ -143,8 +144,6 @@ public class AntivirusProcessor implements MessageProcessor
 			}
 
 		}
-
-		return;
 	}
 
 	private Boolean shouldScan(Message message, AntivirusConfigurationHolder avConfHolder)

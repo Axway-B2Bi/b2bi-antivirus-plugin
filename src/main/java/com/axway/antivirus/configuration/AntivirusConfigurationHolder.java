@@ -19,6 +19,8 @@ public class AntivirusConfigurationHolder
 	private String service;
 	private String serverVersion;
 	private int previewSize;
+	private int stdReceiveLength;
+	private int stdSendLength;
 	private int connectionTimeout;
 	private boolean rejectFileOnError;
 	private long maxFileSize;
@@ -47,6 +49,8 @@ public class AntivirusConfigurationHolder
 		port = template.getPort();
 		service = template.getService();
 		previewSize = template.getPreviewSize();
+		stdReceiveLength = template.getStdReceiveLength();
+		stdSendLength = template.getStdSendLength();
 		connectionTimeout = template.getConnectionTimeout();
 		rejectFileOnError = template.isRejectFileOnError();
 		serverVersion = template.getServerVersion();
@@ -66,6 +70,8 @@ public class AntivirusConfigurationHolder
 	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_SERVICE}</li>
 	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_ICAP_SERVER_VERSION}</li>
 	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_PREVIEW_SIZE}</li>
+	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_STANDARD_RECEIVE_LENGTH}</li>
+	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_STANDARD_SEND_LENGTH}</li>
 	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_CONNECTION_TIMEOUT}</li>
 	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_REJECT_FILE_ON_ERROR}</li>
 	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_MAX_FILE_SIZE}</li>
@@ -97,25 +103,26 @@ public class AntivirusConfigurationHolder
 			break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_PORT:
 			{
-				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 10)
+				try
 				{
-					logger.error("Antivirus port is invalid: \"" + value + "\"");
-					throw new AntivirusException("Antivirus port is invalid");
-				}
-				else
-				{
-					try
+					int portValue = Integer.parseInt(value);
+					if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 5 || portValue < 0)
 					{
-						this.setPort(Integer.parseInt(value));
+						logger.error("Antivirus port is invalid: \"" + value + "\"");
+						throw new AntivirusException("Antivirus port is invalid");
+					}
+					else
+					{
+						this.setPort(portValue);
 						if (logger.isDebugEnabled())
 							logger.debug("Antivirus port is: " + value);
 					}
-					catch (NumberFormatException nfe)
-					{
-						logger.error("Antivirus port value is invalid: " + value);
-						throw new AntivirusException("Antivirus port is invalid.");
-					}
 
+				}
+				catch (NumberFormatException nfe)
+				{
+					logger.error("Antivirus port value is invalid: " + value);
+					throw new AntivirusException("Antivirus port is invalid.");
 				}
 			}
 			break;
@@ -151,46 +158,132 @@ public class AntivirusConfigurationHolder
 			break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_PREVIEW_SIZE:
 			{
-				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 25)
+				try
 				{
-					logger.error("Antivirus preview size value is invalid: \"" + value + "\", preview size from server will be used.");
-				}
-				else
-				{
-					try
+					if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 15)
 					{
-						this.setPreviewSize(Integer.valueOf(value));
+						logger.error("Antivirus preview size value is invalid: \"" + value
+							+ "\", preview size from server will be used.");
+						this.setPreviewSize(-1);
+						return;
+					}
+					int size = Integer.parseInt(value);
+					if (size <= 0)
+					{
+						logger.error("Antivirus preview size value is invalid: \"" + value
+							+ "\", preview size from server will be used.");
+						this.setPreviewSize(-1);
+					}
+					else
+					{
+						this.setPreviewSize(size);
 						if (logger.isDebugEnabled())
 							logger.debug("Antivirus preview size is: " + value);
 					}
-					catch (NumberFormatException nfe)
+
+				}
+				catch (NumberFormatException nfe)
+				{
+					logger.error("Antivirus preview size  value is invalid: " + value);
+					throw new AntivirusException("Antivirus preview size value is invalid.");
+				}
+			}
+			break;
+			case Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_RECEIVE_LENGTH:
+			{
+				try
+				{
+					if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 15)
 					{
-						logger.error("Antivirus preview size  value is invalid: " + value);
-						throw new AntivirusException("Antivirus preview size value is invalid.");
+						logger.error("Antivirus standard receive length value is invalid: \"" + value
+							+ "\", standard receive length default value  will be used.");
+						this.setStdReceiveLength(8192);
+						return;
 					}
+					int receiveLength = Integer.parseInt(value);
+					if (receiveLength <= 0)
+					{
+						logger.error("Antivirus standard receive length value is invalid: \"" + value
+							+ "\", standard receive length default value  will be used.");
+						this.setStdReceiveLength(8192);
+					}
+					else
+					{
+						this.setStdReceiveLength(receiveLength);
+						if (logger.isDebugEnabled())
+							logger.debug("Antivirus standard receive length is: " + value);
+					}
+
+				}
+				catch (NumberFormatException nfe)
+				{
+					logger.error("Antivirus standard receive length is invalid, standard receive length default value  will be used.");
+					this.setStdReceiveLength(8192);
+				}
+			}
+			break;
+			case Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_SEND_LENGTH:
+			{
+				try
+				{
+					if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 15)
+					{
+						logger.error("Antivirus standard send length value is invalid: \"" + value
+							+ "\", standard send length default will be used.");
+						this.setStdSendLength(8192);
+						return;
+					}
+					int sendLength = Integer.parseInt(value);
+					if (sendLength <= 0)
+					{
+						logger.error("Antivirus standard send length value is invalid: \"" + value
+							+ "\", standard send length default will be used.");
+						this.setStdSendLength(8192);
+					}
+					else
+					{
+						this.setStdSendLength(sendLength);
+						if (logger.isDebugEnabled())
+							logger.debug("Antivirus standard send length is: " + value);
+					}
+
+				}
+				catch (NumberFormatException nfe)
+				{
+					logger.error("Antivirus standard send length value is invalid, standard send length default will be used.");
+					this.setStdSendLength(8192);
 				}
 			}
 			break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_CONNECTION_TIMEOUT:
 			{
-				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 25)
+				try
 				{
-					logger.error("Antivirus connection timeout value is invalid: \"" + value + "\"");
-					throw new AntivirusException("Antivirus connection timeout value is invalid.");
-				}
-				else
-				{
-					try
+					if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 15)
 					{
-						this.setConnectionTimeout(Integer.valueOf(value));
+						logger.error("Connection timeout value is invalid, default value will be set.");
+						this.setConnectionTimeout(10000);
+						return;
+					}
+					int timeout = Integer.parseInt(value);
+					if (timeout <= 0)
+					{
+						logger.error(
+							"Connection timeout value is invalid: " + timeout + ". Default value will be set.");
+						this.setConnectionTimeout(10000);
+					}
+					else
+					{
+						this.setConnectionTimeout(timeout);
 						if (logger.isDebugEnabled())
 							logger.debug("Antivirus connection timeout is: " + value);
+
 					}
-					catch (NumberFormatException nfe)
-					{
-						logger.error("Antivirus connection timeout value is invalid: " + value);
-						throw new AntivirusException("Antivirus connection timeout value is invalid.");
-					}
+				}
+				catch (NumberFormatException nfe)
+				{
+					logger.error("Antivirus connection timeout value is invalid: " + value);
+					throw new AntivirusException("Antivirus connection timeout value is invalid.");
 				}
 			}
 			break;
@@ -208,24 +301,30 @@ public class AntivirusConfigurationHolder
 			break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_MAX_FILE_SIZE:
 			{
-				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 25)
+				try
 				{
-					this.setMaxFileSize(-1);
-					return;
-				}
-				else
-				{
-					try
+					if (StringUtil.isNullEmptyOrBlank(value))
 					{
-						this.setMaxFileSize(Long.parseLong(value));
+						this.setMaxFileSize(-1);
+						return;
+					}
+					long maxSize = Long.parseLong(value);
+					if (value.length() > 15 || maxSize <= 0)
+					{
+						this.setMaxFileSize(-1);
+						return;
+					}
+					else
+					{
+						this.setMaxFileSize(maxSize);
 						if (logger.isDebugEnabled())
 							logger.debug("Antivirus maximum file size is: " + value);
 					}
-					catch (NumberFormatException nfe)
-					{
-						logger.error("Antivirus maximum file size value is invalid: " + value);
-						throw new AntivirusException("Antivirus maximum file size value is invalid.");
-					}
+				}
+				catch (NumberFormatException nfe)
+				{
+					logger.error("Antivirus maximum file size value is invalid: " + value);
+					throw new AntivirusException("Antivirus maximum file size value is invalid.");
 				}
 			}
 			break;
@@ -377,6 +476,26 @@ public class AntivirusConfigurationHolder
 	public void setPreviewSize(int mPreviewSize)
 	{
 		this.previewSize = mPreviewSize;
+	}
+
+	public int getStdReceiveLength()
+	{
+		return stdReceiveLength;
+	}
+
+	public void setStdReceiveLength(int stdReceiveLength)
+	{
+		this.stdReceiveLength = stdReceiveLength;
+	}
+
+	public int getStdSendLength()
+	{
+		return stdSendLength;
+	}
+
+	public void setStdSendLength(int stdSendLength)
+	{
+		this.stdSendLength = stdSendLength;
 	}
 
 	public long getMaxFileSize()

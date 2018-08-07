@@ -1,7 +1,6 @@
 package com.axway.antivirus.configuration;
 
 import com.axway.antivirus.inlineprocessor.AntivirusProcessor;
-
 import com.cyclonecommerce.util.file.FileRegistryHelper;
 
 import org.apache.log4j.Logger;

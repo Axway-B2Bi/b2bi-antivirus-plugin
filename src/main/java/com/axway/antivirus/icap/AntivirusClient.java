@@ -38,8 +38,8 @@ public class AntivirusClient
 	private int connectionTimeout;
 
 	private int stdPreviewSize;
-	private static final int STANDARD_RECEIVE_LENGTH = 8192;
-	private static final int STANDARD_SEND_LENGTH = 8192;
+	private int stdReceiveLength;
+	private int stdSendLength;
 
 	private StringBuilder failureReason;
 
@@ -49,16 +49,20 @@ public class AntivirusClient
 	 * @param serviceName The service to use (eg. "squidclamav").
 	 * @param version The version of the ICAP server
 	 * @param stdPreviewSize The preview size taken into account only if it's smaller than the one gotten from the server (returned by getOptions() method)
+	 * @param standardReceiveLength The length of the chunk received from the ICAP server, used in getHeader() method.
+	 * @param standardSendLength The length of the chunk sent to the ICAP server, used for splitting the message in chunks
 	 * @param connectionTimeout The time to wait for a connection to the ICAP server in milliseconds
 	 */
 	public AntivirusClient(String hostname, int serverPort, String serviceName, String version, int stdPreviewSize,
-		int connectionTimeout)
+		int standardReceiveLength, int standardSendLength, int connectionTimeout)
 	{
 		this.serviceName = serviceName;
 		this.hostname = hostname;
 		this.port = serverPort;
 		this.serverVersion = version;
 		this.stdPreviewSize = stdPreviewSize;
+		this.stdReceiveLength = standardReceiveLength;
+		this.stdSendLength = standardSendLength;
 		this.connectionTimeout = connectionTimeout;
 	}
 
@@ -103,8 +107,8 @@ public class AntivirusClient
 				{
 					int serverPreviewSize = Integer.parseInt(tempString);
 					//the preview size will be set from the server or from the configuration file only if it is smaller than what the server returned
-					this.stdPreviewSize =
-						serverPreviewSize > this.stdPreviewSize ? this.stdPreviewSize : serverPreviewSize;
+					if (this.stdPreviewSize == -1 || this.stdPreviewSize > serverPreviewSize)
+						this.stdPreviewSize = serverPreviewSize;
 					logger.info("Preview size received from server: " + serverPreviewSize + ". Using preview size: "
 						+ stdPreviewSize);
 				}
@@ -122,7 +126,7 @@ public class AntivirusClient
 	}
 
 	/**
-	 * Given a filepath, it will send the file to the server and return true,
+	 * Given a file, it will send the file to the server and return true,
 	 * if the server accepts the file. Visa-versa, false if the server rejects it.
 	 *
 	 * @param file Relative or absolute filepath to a file.
@@ -209,9 +213,11 @@ public class AntivirusClient
 
 					switch (status)
 					{
-						case 100:
-							break; //Continue transfer for the rest of the file
-						case 200: //file is infected
+						case 100: //Continue transfer for the rest of the file
+							break;
+						case 200: //the request has been successfully executed but the file may be infected
+							//we must check for the extension headers if a threat has been found
+							//if they don't exists it means that the file was sent but the antivirus didn't actually scan it
 						{
 							failureReason = new StringBuilder();
 							for (String key : responseMap.keySet())
@@ -220,12 +226,12 @@ public class AntivirusClient
 							logger.error("Infection found: " + failureReason.toString());
 							return false;
 						}
-						case 204:
-							return true; //file is clean
+						case 204: //file is clean
+							return true;
 						case 404:
 							throw new AntivirusException("404: ICAP Service not found");
-						case 501:
-							throw new AntivirusException("501: Method not implemented"); // when the ICAP server does not have implemented the RESPMOD option
+						case 501: // when the ICAP server does not have implemented the RESPMOD option
+							throw new AntivirusException("501: Method not implemented");
 						default:
 							throw new AntivirusException("Server returned unknown status code:" + status);
 					}
@@ -235,7 +241,7 @@ public class AntivirusClient
 			//Sending remaining part of file
 			if (fileSize > previewSize)
 			{
-				byte[] buffer = new byte[STANDARD_SEND_LENGTH];
+				byte[] buffer = new byte[stdSendLength];
 				int bytesRead;
 				while ((bytesRead = fileInStream.read(buffer)) != -1)
 				{
@@ -323,12 +329,12 @@ public class AntivirusClient
 	private String getHeader(String terminator) throws IOException, AntivirusException
 	{
 		byte[] endofheader = terminator.getBytes(StandardCharsetsUTF8);
-		byte[] buffer = new byte[STANDARD_RECEIVE_LENGTH];
+		byte[] buffer = new byte[stdReceiveLength];
 
 		int n;
 		int offset = 0;
-		//STANDARD_RECEIVE_LENGTH-offset is replaced by '1' to not receive the next (HTTP) header.
-		while ((offset < STANDARD_RECEIVE_LENGTH) && ((n = in.read(buffer, offset, 1)) != -1))
+		//stdReceiveLength-offset is replaced by '1' to not receive the next (HTTP) header.
+		while ((offset < stdReceiveLength) && ((n = in.read(buffer, offset, 1)) != -1))
 		{ // first part is to secure against DOS
 			offset += n;
 			if (offset > endofheader.length + 13)
