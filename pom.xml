@@ -10,7 +10,7 @@
 		<version>19</version>
 	</parent>
 
-	<groupId>com.axway.processor</groupId>
+	<groupId>com.axway.b2bi.processor</groupId>
 	<artifactId>antivirus-processor</artifactId>
 	<name>${project.artifactId}</name>
 	<description>Inline processor of ICAP client</description>
@@ -29,26 +29,19 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<index>false</index>
-						<manifest>
-							<addClasspath>false</addClasspath>
-						</manifest>
-						<manifestEntries>
-							<AxwayCustomJar>This is a custom jar generated from the sources of AntivirusProcessor.
-							</AxwayCustomJar>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<source>7</source>
 					<target>7</target>
+				</configuration>
+			</plugin>
+			<!-- Do not generate a source jar -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<skipSource>true</skipSource>
 				</configuration>
 			</plugin>
 		</plugins>
