@@ -23,6 +23,7 @@ public class AntivirusConfigurationHolder
 	private int stdSendLength;
 	private int connectionTimeout;
 	private boolean rejectFileOnError;
+	private boolean scanFromIntegrator;
 	private long maxFileSize;
 	private List<String> fileNameRestriction;
 	private List<String> fileExtensionRestriction;
@@ -53,6 +54,7 @@ public class AntivirusConfigurationHolder
 		stdSendLength = template.getStdSendLength();
 		connectionTimeout = template.getConnectionTimeout();
 		rejectFileOnError = template.isRejectFileOnError();
+		scanFromIntegrator = template.isScanFromIntegrator();
 		serverVersion = template.getServerVersion();
 		maxFileSize = template.getMaxFileSize();
 		fileNameRestriction.addAll(template.getFilenameRestrictions());
@@ -74,6 +76,7 @@ public class AntivirusConfigurationHolder
 	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_STANDARD_SEND_LENGTH}</li>
 	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_CONNECTION_TIMEOUT}</li>
 	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_REJECT_FILE_ON_ERROR}</li>
+	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_SCAN_FROM_INTEGRATOR}</li>
 	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_MAX_FILE_SIZE}</li>
 	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_FILENAME_RESTRICTION}</li>
 	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_FILE_EXTENSION_RESTRICTION}</li>
@@ -289,13 +292,31 @@ public class AntivirusConfigurationHolder
 			break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_REJECT_FILE_ON_ERROR:
 			{
-				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 10)
+				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 6)
+				{
 					this.setRejectFileOnError(Boolean.valueOf("true"));
+					logger.error("Incorrect value for reject file on error property. Default value will be used: \"true\".");
+				}
 				else
 				{
 					this.setRejectFileOnError(Boolean.valueOf(value));
 					if (logger.isDebugEnabled())
 						logger.debug("Reject file on error value is: " + value);
+				}
+			}
+			break;
+			case Constants.SCANNER_CONFIGURATION_PROPERTY_SCAN_FROM_INTEGRATOR:
+			{
+				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 6)
+				{
+					this.setScanFromIntegrator(Boolean.valueOf("false"));
+					logger.error("Incorrect value for scan from integrator property. Default value will be used: \"false\".");
+				}
+				else
+				{
+					this.setScanFromIntegrator(Boolean.valueOf(value));
+					if (logger.isDebugEnabled())
+						logger.debug("Scan from integrator value is: " + value);
 				}
 			}
 			break;
@@ -311,8 +332,8 @@ public class AntivirusConfigurationHolder
 					long maxSize = Long.parseLong(value);
 					if (value.length() > 15 || maxSize <= 0)
 					{
+						logger.error("Incorrect max file size value. The restriction will not be used.");
 						this.setMaxFileSize(-1);
-						return;
 					}
 					else
 					{
@@ -558,14 +579,25 @@ public class AntivirusConfigurationHolder
 		this.serverVersion = mVersion;
 	}
 
+	public boolean isScanFromIntegrator()
+	{
+		return scanFromIntegrator;
+	}
+
+	public void setScanFromIntegrator(boolean scanFromIntegrator)
+	{
+		this.scanFromIntegrator = scanFromIntegrator;
+	}
+
 	@Override
 	public String toString()
 	{
 		return "AntivirusConfigurationHolder{" + "scannerId='" + scannerId + '\'' + ", hostname='" + hostname + '\''
 			+ ", port=" + port + ", service='" + service + '\'' + ", serverVersion='" + serverVersion + '\''
-			+ ", previewSize=" + previewSize + ", connectionTimeout=" + connectionTimeout + ", rejectFileOnError="
-			+ rejectFileOnError + ", maxFileSize=" + maxFileSize + ", fileNameRestriction=" + fileNameRestriction
-			+ ", fileExtensionRestriction=" + fileExtensionRestriction + ", protocolRestriction=" + protocolRestriction
-			+ ", partnerNameRestriction=" + partnerNameRestriction + '}';
+			+ ", previewSize=" + previewSize + ", stdReceiveLength=" + stdReceiveLength + ", stdSendLength="
+			+ stdSendLength + ", connectionTimeout=" + connectionTimeout + ", rejectFileOnError=" + rejectFileOnError
+			+ ", scanFromIntegrator=" + scanFromIntegrator + ", maxFileSize=" + maxFileSize + ", fileNameRestriction="
+			+ fileNameRestriction + ", fileExtensionRestriction=" + fileExtensionRestriction + ", protocolRestriction="
+			+ protocolRestriction + ", partnerNameRestriction=" + partnerNameRestriction + '}';
 	}
 }

@@ -66,11 +66,16 @@ public class AntivirusProcessor implements MessageProcessor
 	@Override
 	public void process(Message message)
 	{
-		logger.info("Inline processor AntivirusProcessor BEGIN (Thread ID = " + Thread.currentThread().getId() + ")");
 		//this should be the default value, if not set in properties file it will be true
 		Boolean rejectFileOnError = true;
 		try
 		{
+			//receipts have no content and should not be scanned
+			if (message.getData() == null || message.getData().length() == 0)
+				return;
+			logger.info(
+				"Inline processor AntivirusProcessor BEGIN (Thread ID = " + Thread.currentThread().getId() + ")");
+
 			long messageLength = message.getData().length();
 			logger.info("Message size: " + messageLength);
 			logger.info(
@@ -78,6 +83,7 @@ public class AntivirusProcessor implements MessageProcessor
 
 			// Create a temporary file containing the message content
 			File temp = message.getData().toFile();
+
 			//get the configuration manager instance
 			AntivirusConfigurationManager avManager = AntivirusConfigurationManager.getInstance();
 			//get the scanner  configuration
@@ -91,6 +97,16 @@ public class AntivirusProcessor implements MessageProcessor
 			}
 			logger.info("Antivirus configuration: " + avConfHolder.toString());
 			rejectFileOnError = avConfHolder.isRejectFileOnError();
+
+			//Get the direction metadata from the message
+			//if the direction is internal the message comes from integrator
+			//if the property (scanFromIntegrator) is not set to true, we should not scan the file
+			String direction = message.getMetadata("Direction");
+			if ("Internal".equalsIgnoreCase(direction) && !avConfHolder.isScanFromIntegrator())
+			{
+				logger.info("Property scanFromIntegrator is set to false, the message received from Integrator will not be scanned.");
+				return;
+			}
 
 			if (!shouldScan(message, avConfHolder))
 				return;
@@ -106,6 +122,7 @@ public class AntivirusProcessor implements MessageProcessor
 
 			//disconnect from the icap server
 			client.disconnect();
+
 			if (result)
 			{
 				logger.info("Message verified and accepted.");
@@ -146,6 +163,13 @@ public class AntivirusProcessor implements MessageProcessor
 		}
 	}
 
+	/**
+	 * Processes all restrictions from the <code>{avScannerConfFilePath}</code> file
+	 * If a restriction matches the message, return false
+	 * If no restriction matches, return true
+	 *
+	 * @return a boolean showing if the message should be scanned or not
+	 **/
 	private Boolean shouldScan(Message message, AntivirusConfigurationHolder avConfHolder)
 	{
 		long messageLength = message.getData().length();

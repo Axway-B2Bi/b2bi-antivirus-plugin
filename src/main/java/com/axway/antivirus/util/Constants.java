@@ -84,4 +84,9 @@ public class Constants
 	 * <code>SCANNERID&gt;.partnerRestriction</code> property inside the antivirus-scanners.properties file
 	 */
 	public static final String SCANNER_CONFIGURATION_PROPERTY_PARTNER_NAME_RESTRICTION = "partnerNameRestriction";
+
+	/**
+	 * <code>SCANNERID&gt;.scanFromIntegrator</code> property inside the antivirus-scanners.properties file
+	 */
+	public static final String SCANNER_CONFIGURATION_PROPERTY_SCAN_FROM_INTEGRATOR = "scanFromIntegrator";
 }

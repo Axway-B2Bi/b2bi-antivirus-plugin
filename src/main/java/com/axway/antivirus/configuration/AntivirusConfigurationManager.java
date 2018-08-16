@@ -30,6 +30,7 @@ public class AntivirusConfigurationManager
 
 	/**
 	 * This class is a singleton and we don't want anybody to instantiate it.
+	 * When the instance for this class is first created the thread that monitors the modifications for the property file is also started
 	 *
 	 * @return An instance of this class.
 	 */
@@ -51,6 +52,12 @@ public class AntivirusConfigurationManager
 		return instance;
 	}
 
+	/**
+	 * Gets the scanner configuration from the <code>{avScannerConfFilePath}</code> file.
+	 * If the configuration is not loaded it loads it, else returns it
+	 *
+	 * @return An instance of the AntivirusConfigurationHolder
+	 **/
 	public AntivirusConfigurationHolder getScannerConfiguration(String pathToFile)
 	{
 		if (getConfLoaded())
@@ -71,6 +78,9 @@ public class AntivirusConfigurationManager
 		}
 	}
 
+	/**
+	 * Loads the scanner configuration from the <code>{avScannerConfFilePath}</code> file.
+	 **/
 	private synchronized void loadConfiguration(String pathToFile) throws AntivirusException
 	{
 		logger.info("Scanner configuration not present or modified - attempting to load it.");
@@ -118,7 +128,7 @@ public class AntivirusConfigurationManager
 							antivirusConfigurationHolder.addProperty(splitKey[1], value);
 						}
 					}
-					//check if the mandatory fields exist in the property files
+					//check if the mandatory fields exist in the property file
 					if (StringUtil.isNullEmptyOrBlank(antivirusConfigurationHolder.getHostname())
 						|| 0 == antivirusConfigurationHolder.getPort()
 						|| StringUtil.isNullEmptyOrBlank(antivirusConfigurationHolder.getService())

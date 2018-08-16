@@ -71,6 +71,7 @@ public class AntivirusClient
 	 * changes settings to match it.
 	 *
 	 * @throws IOException
+	 * @throws AntivirusException
 	 **/
 	public void connect() throws IOException, AntivirusException
 	{
