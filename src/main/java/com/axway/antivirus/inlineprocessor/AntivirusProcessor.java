@@ -130,7 +130,7 @@ public class AntivirusProcessor implements MessageProcessor
 			}
 			else
 			{
-				logger.error("Message Infected - rejecting message");
+				logger.error("Message Infected - rejecting message. Threat: " + client.getFailureReason().toString());
 				message.reject("Message rejected - Infected - " + client.getFailureReason().toString());
 				message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.INFECTED.getValue());
 				temp.delete();
@@ -143,9 +143,9 @@ public class AntivirusProcessor implements MessageProcessor
 		{
 
 			logger.error("IO error occurred when scanning file " + ": " + ex.getMessage());
+			message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.ERROR.getValue());
 			if (rejectFileOnError)
 			{
-				message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.ERROR.getValue());
 				message.reject("An IO error occurred when scanning the file: " + ex);
 			}
 
@@ -154,9 +154,9 @@ public class AntivirusProcessor implements MessageProcessor
 		{
 
 			logger.error("Other error while processing file " + ": " + ex.getMessage());
+			message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.ERROR.getValue());
 			if (rejectFileOnError)
 			{
-				message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.ERROR.getValue());
 				message.reject("An error occurred when scanning the file: " + ex.getMessage());
 			}
 
