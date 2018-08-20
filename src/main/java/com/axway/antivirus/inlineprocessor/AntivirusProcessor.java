@@ -23,6 +23,7 @@ public class AntivirusProcessor implements MessageProcessor
 {
 	private static final Logger logger = Logger.getLogger(AntivirusProcessor.class.getName());
 	private static final String AV_SCAN_STATUS = "AVScanStatus";
+	private static final String AV_SCAN_INFO = "AVScanInfo";
 
 	private static String avScannerConfFilePath;
 
@@ -73,11 +74,14 @@ public class AntivirusProcessor implements MessageProcessor
 			//receipts have no content and should not be scanned
 			if (message.getData() == null || message.getData().length() == 0)
 				return;
+
 			logger.info(
 				"Inline processor AntivirusProcessor BEGIN (Thread ID = " + Thread.currentThread().getId() + ")");
 
+			//print the message size in the te log
 			long messageLength = message.getData().length();
 			logger.info("Message size: " + messageLength);
+			//print in the te log from which pickup  the message was sent to the inline processor
 			logger.info(
 				"Message sent to the AntivirusProcessor through: \"" + message.getMetadata("PickupName") + "\" pickup");
 
@@ -91,16 +95,18 @@ public class AntivirusProcessor implements MessageProcessor
 			if (avConfHolder == null)
 			{
 				message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.ERROR.getValue());
-				message.reject("Antivirus configuration file is corrupt; check logs for more details.");
+				message.setMetadata(AV_SCAN_INFO, "Antivirus configuration file is corrupt; check logs for more details.");
 				logger.error("Antivirus configuration file is corrupt; message will be rejected.");
 				return;
 			}
+			//print in the te log the configuration used for this message
 			logger.info("Antivirus configuration: " + avConfHolder.toString());
+
 			rejectFileOnError = avConfHolder.isRejectFileOnError();
 
 			//Get the direction metadata from the message
 			//if the direction is internal the message comes from integrator
-			//if the property (scanFromIntegrator) is not set to true, we should not scan the file
+			//if the property (scanFromIntegrator) is not set to true (in the configuration file), we should not scan the file
 			String direction = message.getMetadata("Direction");
 			if ("Internal".equalsIgnoreCase(direction) && !avConfHolder.isScanFromIntegrator())
 			{
@@ -108,6 +114,7 @@ public class AntivirusProcessor implements MessageProcessor
 				return;
 			}
 
+			//check all restrictions from the configuration file
 			if (!shouldScan(message, avConfHolder))
 				return;
 
@@ -125,13 +132,17 @@ public class AntivirusProcessor implements MessageProcessor
 
 			if (result)
 			{
+				//the antivirus didn't find a threat, message is clean
 				logger.info("Message verified and accepted.");
 				message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.CLEAN.getValue());
 			}
 			else
 			{
+				//the antivirus found a threat, reject the message
+				//the actual reject is done in the MessageProcessorExecutor class based on the metadata from the message
 				logger.error("Message Infected - rejecting message. Threat: " + client.getFailureReason().toString());
-				message.reject("Message rejected - Infected - " + client.getFailureReason().toString());
+				message.setMetadata(AV_SCAN_INFO,
+					"Message Infected - rejecting message. Threat: " + client.getFailureReason().toString());
 				message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.INFECTED.getValue());
 				temp.delete();
 				return;
@@ -146,7 +157,7 @@ public class AntivirusProcessor implements MessageProcessor
 			message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.ERROR.getValue());
 			if (rejectFileOnError)
 			{
-				message.reject("An IO error occurred when scanning the file: " + ex);
+				message.setMetadata(AV_SCAN_INFO, "An IO error occurred when scanning the file: " + ex);
 			}
 
 		}
@@ -157,7 +168,7 @@ public class AntivirusProcessor implements MessageProcessor
 			message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.ERROR.getValue());
 			if (rejectFileOnError)
 			{
-				message.reject("An error occurred when scanning the file: " + ex.getMessage());
+				message.setMetadata(AV_SCAN_INFO, "An error occurred when scanning the file: " + ex.getMessage());
 			}
 
 		}
@@ -210,6 +221,7 @@ public class AntivirusProcessor implements MessageProcessor
 				}
 			}
 
+		//business protocol validation
 		ExchangePoint ep = ExchangePointManager.getInstance().getExchangePoint(message.getMetadata("ConsumptionExchangePointId"));
 		if (ep != null)
 		{
@@ -226,6 +238,7 @@ public class AntivirusProcessor implements MessageProcessor
 					}
 				}
 		}
+
 		//partner name validation
 		String partner = "";
 		String direction = message.getMetadata("Direction");

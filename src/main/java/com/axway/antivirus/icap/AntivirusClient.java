@@ -27,6 +27,8 @@ public class AntivirusClient
 	private static final String HTTPTERMINATOR = "0\r\n\r\n";
 	private static final String LINETERMINATOR = "\r\n";
 
+	private static final String SERVER_RESPONSE = "Server response: ";
+
 	private Socket client;
 	private DataOutputStream out;
 	private DataInputStream in;
@@ -216,13 +218,13 @@ public class AntivirusClient
 					switch (status)
 					{
 						case 100: //Continue transfer for the rest of the file
-							logger.info("Server response: " + status + " - continue transfer.");
+							logger.info(SERVER_RESPONSE + status + " - continue transfer.");
 							break;
 						case 200: //the request has been successfully executed but the file may be infected
 							//we must check for the extension headers if a threat has been found
 							//if they don't exists it means that the file was sent but the antivirus didn't actually scan it
 						{
-							logger.info("Server response: " + status + " - request successfully processed by server, checking for threats...");
+							logger.info(SERVER_RESPONSE + status + " - request successfully processed by server, checking for threats...");
 							failureReason = new StringBuilder();
 							for (String key : responseMap.keySet())
 								if (key.startsWith("X-"))
@@ -274,7 +276,7 @@ public class AntivirusClient
 			String response = getHeader(ICAPTERMINATOR);
 			responseMap = parseHeader(response);
 			if (logger.isTraceEnabled())
-				logger.trace("Server response: " + response);
+				logger.trace(SERVER_RESPONSE + response);
 
 			String tempString = responseMap.get(STATUS_CODE);
 			if (tempString != null)
@@ -283,7 +285,7 @@ public class AntivirusClient
 
 				if (status == 204)
 				{
-					logger.info("Server response: " + status + " - Unmodified. ");
+					logger.info(SERVER_RESPONSE + status + " - Unmodified. ");
 					return true;
 				} //Unmodified
 
@@ -291,7 +293,7 @@ public class AntivirusClient
 				{
 					//This time the 200 means that the antivirus found a virus
 					//We should check for the threat and print the info in the failure reason
-					logger.info("Server response: " + status + " - request successfully processed by server, checking for threats...");
+					logger.info(SERVER_RESPONSE + status + " - request successfully processed by server, checking for threats...");
 					failureReason = new StringBuilder();
 					for (String key : responseMap.keySet())
 						if (key.startsWith("X-"))
