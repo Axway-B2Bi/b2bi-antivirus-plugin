@@ -187,8 +187,10 @@ public class AntivirusConfigurationHolder
 				}
 				catch (NumberFormatException nfe)
 				{
-					logger.error("Antivirus preview size  value is invalid: " + value);
-					throw new AntivirusException("Antivirus preview size value is invalid.");
+					logger.error("Antivirus preview size value is invalid: \"" + value
+						+ "\", preview size from server will be used.");
+					this.setPreviewSize(-1);
+					return;
 				}
 			}
 			break;
@@ -285,8 +287,9 @@ public class AntivirusConfigurationHolder
 				}
 				catch (NumberFormatException nfe)
 				{
-					logger.error("Antivirus connection timeout value is invalid: " + value);
-					throw new AntivirusException("Antivirus connection timeout value is invalid.");
+					logger.error("Connection timeout value is invalid, default value will be set.");
+					this.setConnectionTimeout(10000);
+					return;
 				}
 			}
 			break;
