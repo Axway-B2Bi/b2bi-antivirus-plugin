@@ -295,31 +295,48 @@ public class AntivirusConfigurationHolder
 			break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_REJECT_FILE_ON_ERROR:
 			{
-				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 6)
+				if (!StringUtil.isNullEmptyOrBlank(value))
+					switch (value)
+					{
+						case "true":
+						case "false":
+							this.setRejectFileOnError(Boolean.valueOf(value));
+							if (logger.isDebugEnabled())
+								logger.debug("Reject file on error value is: " + value);
+							break;
+						default:
+							this.setRejectFileOnError(Boolean.valueOf("true"));
+							logger.error("Incorrect value for reject file on error property. Default value will be used: \"true\".");
+							break;
+					}
+				else
 				{
 					this.setRejectFileOnError(Boolean.valueOf("true"));
 					logger.error("Incorrect value for reject file on error property. Default value will be used: \"true\".");
 				}
-				else
-				{
-					this.setRejectFileOnError(Boolean.valueOf(value));
-					if (logger.isDebugEnabled())
-						logger.debug("Reject file on error value is: " + value);
-				}
+
 			}
 			break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_SCAN_FROM_INTEGRATOR:
 			{
-				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 6)
+				if (!StringUtil.isNullEmptyOrBlank(value))
+					switch (value)
+					{
+						case "true":
+						case "false":
+							this.setScanFromIntegrator(Boolean.valueOf(value));
+							if (logger.isDebugEnabled())
+								logger.debug("Scan from integrator value is: " + value);
+							break;
+						default:
+							this.setScanFromIntegrator(Boolean.valueOf("false"));
+							logger.error("Incorrect value for scan from integrator property. Default value will be used: \"false\".");
+							break;
+					}
+				else
 				{
 					this.setScanFromIntegrator(Boolean.valueOf("false"));
 					logger.error("Incorrect value for scan from integrator property. Default value will be used: \"false\".");
-				}
-				else
-				{
-					this.setScanFromIntegrator(Boolean.valueOf(value));
-					if (logger.isDebugEnabled())
-						logger.debug("Scan from integrator value is: " + value);
 				}
 			}
 			break;
