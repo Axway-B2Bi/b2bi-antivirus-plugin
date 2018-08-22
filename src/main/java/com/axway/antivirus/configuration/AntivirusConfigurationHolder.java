@@ -32,6 +32,9 @@ public class AntivirusConfigurationHolder
 
 	public AntivirusConfigurationHolder()
 	{
+		//set default values for rejectFileOnError and scanFromIntegrator
+		rejectFileOnError = true;
+		scanFromIntegrator = false;
 		fileNameRestriction = new ArrayList<>();
 		fileExtensionRestriction = new ArrayList<>();
 		protocolRestriction = new ArrayList<>();
@@ -364,8 +367,8 @@ public class AntivirusConfigurationHolder
 				}
 				catch (NumberFormatException nfe)
 				{
-					logger.error("Antivirus maximum file size value is invalid: " + value);
-					throw new AntivirusException("Antivirus maximum file size value is invalid.");
+					logger.error("Incorrect max file size value. The restriction will not be used.");
+					this.setMaxFileSize(-1);
 				}
 			}
 			break;
