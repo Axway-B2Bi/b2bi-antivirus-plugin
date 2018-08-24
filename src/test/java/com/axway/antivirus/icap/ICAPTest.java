@@ -24,8 +24,10 @@ public class ICAPTest
 	@Before
 	public void setUp()
 	{
-		pathToConfFile = Paths.get(".").toAbsolutePath().normalize().toString()
-			+ "\\src\\test\\java\\resources\\avScanner2.properties";
+		pathToConfFile =
+			Paths.get(".").toAbsolutePath().normalize().toString() + File.pathSeparator + "src" + File.pathSeparator
+				+ "test" + File.pathSeparator + "java" + File.pathSeparator + "resources" + File.pathSeparator
+				+ "avScanner2.properties";
 		avConfManager = AntivirusConfigurationManager.getInstance();
 		avHolder = avConfManager.getScannerConfiguration(pathToConfFile);
 	}

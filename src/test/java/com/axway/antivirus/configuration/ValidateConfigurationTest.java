@@ -1,8 +1,5 @@
 package com.axway.antivirus.configuration;
 
-import com.axway.util.StringUtil;
-
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,10 +26,14 @@ public class ValidateConfigurationTest
 	@Before
 	public void setUp()
 	{
-		pathToConfFile = Paths.get(".").toAbsolutePath().normalize().toString()
-			+ "\\src\\test\\java\\resources\\avScanner.properties";
-		pathToNewConfFile = Paths.get(".").toAbsolutePath().normalize().toString()
-			+ "\\src\\test\\java\\resources\\avScanner2.properties";
+		pathToConfFile =
+			Paths.get(".").toAbsolutePath().normalize().toString() + File.pathSeparator + "src" + File.pathSeparator
+				+ "test" + File.pathSeparator + "java" + File.pathSeparator + "resources" + File.pathSeparator
+				+ "avScanner.properties";
+		pathToNewConfFile =
+			Paths.get(".").toAbsolutePath().normalize().toString() + File.pathSeparator + "src" + File.pathSeparator
+				+ "test" + File.pathSeparator + "java" + File.pathSeparator + "resources" + File.pathSeparator
+				+ "avScanner2.properties";
 
 		avConfManager = AntivirusConfigurationManager.getInstance();
 		avConfHolder = avConfManager.getScannerConfiguration(pathToConfFile);

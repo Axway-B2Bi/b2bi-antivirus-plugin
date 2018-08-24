@@ -3,6 +3,7 @@ package com.axway.antivirus.configuration;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -18,8 +19,10 @@ public class ReadConfigurationTest
 	@Before
 	public void setUp()
 	{
-		String pathToConfFile = Paths.get(".").toAbsolutePath().normalize().toString()
-			+ "\\src\\test\\java\\resources\\avScanner.properties";
+		String pathToConfFile =
+			Paths.get(".").toAbsolutePath().normalize().toString() + File.pathSeparator + "src" + File.pathSeparator
+				+ "test" + File.pathSeparator + "java" + File.pathSeparator + "resources" + File.pathSeparator
+				+ "avScanner.properties";
 		avConfManager = AntivirusConfigurationManager.getInstance();
 		avHolder = avConfManager.getScannerConfiguration(pathToConfFile);
 
