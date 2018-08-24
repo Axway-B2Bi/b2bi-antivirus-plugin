@@ -27,15 +27,14 @@ public class ValidateConfigurationTest
 	public void setUp()
 	{
 		pathToConfFile =
-			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator
-				+ "test" + File.separator + "java" + File.separator + "resources" + File.separator
-				+ "avScanner.properties";
+			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator + "test"
+				+ File.separator + "java" + File.separator + "resources" + File.separator + "avScanner.properties";
 		pathToNewConfFile =
-			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator
-				+ "test" + File.separator + "java" + File.separator + "resources" + File.separator
-				+ "avScanner2.properties";
+			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator + "test"
+				+ File.separator + "java" + File.separator + "resources" + File.separator + "avScanner2.properties";
 
 		avConfManager = AntivirusConfigurationManager.getInstance();
+		avConfManager.setConfLoaded(false);
 		avConfHolder = avConfManager.getScannerConfiguration(pathToConfFile);
 	}
 

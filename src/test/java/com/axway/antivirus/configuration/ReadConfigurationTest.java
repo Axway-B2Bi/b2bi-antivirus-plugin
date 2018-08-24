@@ -24,6 +24,7 @@ public class ReadConfigurationTest
 				+ "test" + File.separator + "java" + File.separator + "resources" + File.separator
 				+ "avScanner.properties";
 		avConfManager = AntivirusConfigurationManager.getInstance();
+		avConfManager.setConfLoaded(false);
 		avHolder = avConfManager.getScannerConfiguration(pathToConfFile);
 
 	}
