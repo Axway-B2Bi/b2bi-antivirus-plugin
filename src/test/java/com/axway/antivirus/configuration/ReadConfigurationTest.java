@@ -20,8 +20,8 @@ public class ReadConfigurationTest
 	public void setUp()
 	{
 		String pathToConfFile =
-			Paths.get(".").toAbsolutePath().normalize().toString() + File.pathSeparator + "src" + File.pathSeparator
-				+ "test" + File.pathSeparator + "java" + File.pathSeparator + "resources" + File.pathSeparator
+			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator
+				+ "test" + File.separator + "java" + File.separator + "resources" + File.separator
 				+ "avScanner.properties";
 		avConfManager = AntivirusConfigurationManager.getInstance();
 		avHolder = avConfManager.getScannerConfiguration(pathToConfFile);
