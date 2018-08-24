@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.axway.parent</groupId>
 		<artifactId>parent</artifactId>
-		<version>19</version>
+		<version>23</version>
 	</parent>
 
 	<groupId>com.axway.b2bi.processor</groupId>
