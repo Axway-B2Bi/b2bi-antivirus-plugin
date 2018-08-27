@@ -162,25 +162,26 @@ public class AntivirusConfigurationManager
 	 * Reads a properties file and returns a {@link Properties} object with the file's contents.
 	 */
 
-	private Properties getPropertiesFromFile(String file) throws Exception
+	private Properties getPropertiesFromFile(String file) throws AntivirusException
 	{
 		File propFile = new File(file);
+		String errorMsg = "The file \"" + propFile.getAbsolutePath();
 		if (!propFile.exists())
 		{
-			logger.error("The file \"" + propFile.getAbsolutePath() + "\" does not exist.");
+			logger.error(errorMsg + "\" does not exist.");
 			return null;
 		}
 
 		if (!propFile.isFile())
 		{
-			logger.error("The file \"" + propFile.getAbsolutePath()
+			logger.error(errorMsg
 				+ "\" is actually not a regular file! Cannot be used as configuration file for this program. ");
 			return null;
 		}
 
 		if (!propFile.canRead())
 		{
-			logger.error("The file \"" + propFile.getAbsolutePath() + "\" cannot be read!");
+			logger.error(errorMsg + "\" cannot be read!");
 			return null;
 		}
 
@@ -195,7 +196,7 @@ public class AntivirusConfigurationManager
 			String message =
 				"Error while loading properties from file \"" + propFile.getAbsolutePath() + "\" (" + ioe + ").";
 			logger.error(message, ioe);
-			throw new Exception(message, ioe);
+			throw new AntivirusException(message);
 		}
 	}
 

@@ -1,6 +1,7 @@
 package com.axway.antivirus.icap;
 
 import com.axway.antivirus.exceptions.AntivirusException;
+import com.axway.util.StringUtil;
 
 import org.apache.log4j.Logger;
 
@@ -98,35 +99,8 @@ public class AntivirusClient
 
 		//HashMap of the key-value pairs of the response
 		Map<String, String> responseMap = parseHeader(parseMe);
-
-		if (responseMap.get(STATUS_CODE) != null)
-		{
-			int status = Integer.parseInt(responseMap.get(STATUS_CODE));
-
-			if (status == 200)
-			{
-				logger.info("Get OPTIONS from server responded with: " + status);
-				String tempString = responseMap.get("Preview");
-				if (tempString != null)
-				{
-					int serverPreviewSize = Integer.parseInt(tempString);
-					//the preview size will be set from the server or from the configuration file only if it is smaller than what the server returned
-					if (this.stdPreviewSize == -1 || this.stdPreviewSize > serverPreviewSize)
-						this.stdPreviewSize = serverPreviewSize;
-					logger.info("Preview size received from server: " + serverPreviewSize + ". Using preview size: "
-						+ stdPreviewSize);
-				}
-			}
-			else
-			{
-				throw new AntivirusException("Could not get preview size from server");
-			}
-		}
-		else
-		{
-			throw new AntivirusException("Could not get options from server");
-		}
-
+		//Interpret the status code and if it is 200, get the preview size from the response
+		interpretStatusCode(responseMap);
 	}
 
 	/**
@@ -142,6 +116,7 @@ public class AntivirusClient
 		{
 			int chunkNumber = 1;
 			int fileSize = fileInStream.available();
+			Map<String, String> responseMap = new HashMap<>();
 
 			//First part of header
 			String resBody = "Content-Length: " + fileSize + ICAPTERMINATOR;
@@ -165,7 +140,7 @@ public class AntivirusClient
 			if (logger.isTraceEnabled())
 				logger.trace("Preview: " + requestBuffer);
 
-			//Sending preview or, if smaller than previewSize, the whole file.
+			//Sending preview or, if it is smaller than previewSize, the whole file.
 			byte[] chunk = new byte[previewSize];
 			fileInStream.read(chunk);
 
@@ -201,108 +176,55 @@ public class AntivirusClient
 			// Parse the response! It might not be "100 continue"
 			// if fileSize < previewSize, then this is actually the response
 			// otherwise it is a "go" for the rest of the file.
-			Map<String, String> responseMap = new HashMap<>();
-			int status;
-
 			if (fileSize > previewSize)
 			{
 				String parseMe = getHeader(ICAPTERMINATOR);
 				responseMap = parseHeader(parseMe);
 				if (logger.isDebugEnabled())
 					logger.debug("Received server response after preview.");
-				String tempString = responseMap.get(STATUS_CODE);
-				if (tempString != null)
-				{
-					status = Integer.parseInt(tempString);
-
-					switch (status)
+				//check to see if the status code is : 100 Continue
+				//if it is 100, send the rest of the file
+				// else interpret response
+				Boolean isContinue = interpretStatusCode(responseMap);
+				if (isContinue)
+				{//Sending remaining part of file
+					byte[] buffer = new byte[stdSendLength];
+					int bytesRead;
+					while ((bytesRead = fileInStream.read(buffer)) != -1)
 					{
-						case 100: //Continue transfer for the rest of the file
-							logger.info(SERVER_RESPONSE + status + " - continue transfer.");
-							break;
-						case 200: //the request has been successfully executed but the file may be infected
-							//we must check for the extension headers if a threat has been found
-							//if they don't exists it means that the file was sent but the antivirus didn't actually scan it
+						sendString(Integer.toHexString(buffer.length) + LINETERMINATOR);
+						if (logger.isDebugEnabled())
 						{
-							logger.info(SERVER_RESPONSE + status + " - request successfully processed by server, checking for threats...");
-							failureReason = new StringBuilder();
-							for (String key : responseMap.keySet())
-								if (key.startsWith("X-"))
-									failureReason.append(key + ": " + responseMap.get(key));
-							logger.error("Infection found: " + failureReason.toString());
-							return false;
+							logger.debug("Sending chunk number: " + chunkNumber + " - " + bytesRead + " bytes.");
+							chunkNumber++;
 						}
-						case 204: //file is clean
-							return true;
-						case 404:
-							throw new AntivirusException("404: ICAP Service not found");
-						case 501: // when the ICAP server does not have implemented the RESPMOD option
-							throw new AntivirusException("501: Method not implemented");
-						default:
-							throw new AntivirusException("Server returned unknown status code:" + status);
+						if (logger.isTraceEnabled())
+						{
+							String bufferString = new String(buffer, StandardCharsetsUTF8);
+							logger.trace("Chunk sent: " + bufferString);
+						}
+						sendBytes(buffer);
+						sendString(LINETERMINATOR);
 					}
 				}
-			}
-
-			//Sending remaining part of file
-			if (fileSize > previewSize)
-			{
-				byte[] buffer = new byte[stdSendLength];
-				int bytesRead;
-				while ((bytesRead = fileInStream.read(buffer)) != -1)
-				{
-					sendString(Integer.toHexString(buffer.length) + LINETERMINATOR);
-					if (logger.isDebugEnabled())
-					{
-						logger.debug("Sending chunk number: " + chunkNumber + " - " + bytesRead + " bytes.");
-						chunkNumber++;
-					}
-					if (logger.isTraceEnabled())
-					{
-						String bufferString = new String(buffer, StandardCharsetsUTF8);
-						logger.trace("Chunk sent: " + bufferString);
-					}
-					sendBytes(buffer);
-					sendString(LINETERMINATOR);
-				}
+				else
+					return false;
 				//Closing file transfer.
 				requestBuffer = HTTPTERMINATOR;
 				if (logger.isDebugEnabled())
 					logger.debug("Closing the transfer. ");
 				sendString(requestBuffer);
 			}
+
 			responseMap.clear();
 
 			String response = getHeader(ICAPTERMINATOR);
 			responseMap = parseHeader(response);
 			if (logger.isTraceEnabled())
 				logger.trace(SERVER_RESPONSE + response);
-
-			String tempString = responseMap.get(STATUS_CODE);
-			if (tempString != null)
-			{
-				status = Integer.parseInt(tempString);
-
-				if (status == 204)
-				{
-					logger.info(SERVER_RESPONSE + status + " - Unmodified. ");
-					return true;
-				} //Unmodified
-
-				if (status == 200)
-				{
-					//This time the 200 means that the antivirus found a virus
-					//We should check for the threat and print the info in the failure reason
-					logger.info(SERVER_RESPONSE + status + " - request successfully processed by server, checking for threats...");
-					failureReason = new StringBuilder();
-					for (String key : responseMap.keySet())
-						if (key.startsWith("X-"))
-							failureReason.append(key + ": " + responseMap.get(key));
-					return false;
-				}
-			}
-			throw new AntivirusException("Unrecognized or no status code in response header.");
+			return interpretStatusCode(responseMap);
 		}
+
 	}
 
 	/**
@@ -446,5 +368,88 @@ public class AntivirusClient
 	public StringBuilder getFailureReason()
 	{
 		return failureReason;
+	}
+
+	/**
+	 * Given the response from the server interpret each possible response code
+	 *
+	 * @param responseMap The response packet as a key value pair map.
+	 * @throws AntivirusException
+	 */
+	private Boolean interpretStatusCode(Map<String, String> responseMap) throws AntivirusException
+	{
+		String statusString = responseMap.get(STATUS_CODE);
+		if (!StringUtil.isNullEmptyOrBlank(statusString))
+		{
+			int statusCode = Integer.parseInt(statusString);
+			switch (statusCode)
+			{
+				case 100: //Continue transfer for the rest of the file
+					logger.info(SERVER_RESPONSE + statusCode + " - continue transfer.");
+					return true;
+				case 200:
+					//if the response contains the "Method" key it means it's a response for an OPTIONS request
+					//else the request has been successfully executed but the file may be infected
+					//we must check for the extension headers if a threat has been found
+					//if they don't exists it means that the file was sent but the antivirus didn't actually scan it
+					if (responseMap.containsKey("Methods"))
+					{
+						logger.info(SERVER_RESPONSE + statusCode + " received for get OPTIONS method");
+						String tempString = responseMap.get("Preview");
+						if (tempString != null)
+						{
+							int serverPreviewSize = Integer.parseInt(tempString);
+							//the preview size will be set from the server or from the configuration file only if it is smaller than what the server returned
+							if (this.stdPreviewSize == -1 || this.stdPreviewSize > serverPreviewSize)
+								this.stdPreviewSize = serverPreviewSize;
+							logger.info(
+								"Preview size received from server: " + serverPreviewSize + ". Using preview size: "
+									+ stdPreviewSize);
+						}
+						else
+						{
+							throw new AntivirusException("Could not get preview size from server");
+						}
+						return true;
+					}
+					else
+					{
+						logger.info(SERVER_RESPONSE + statusCode
+							+ " - request successfully processed by server, checking for threats...");
+						failureReason = new StringBuilder();
+						for (String key : responseMap.keySet())
+							if (key.startsWith("X-"))
+								failureReason.append(key + ": " + responseMap.get(key));
+						logger.error("Infection found: " + failureReason.toString());
+						return false;
+					}
+				case 204: //file is clean
+					logger.info(SERVER_RESPONSE + statusCode + " - file is clean.");
+					return true;
+				case 400:
+					throw new AntivirusException("400: Bad request");
+				case 404:
+					throw new AntivirusException("404: ICAP Service not found");
+				case 405: //e.g. RESPMOD requested for service that supports only REQMOD
+					throw new AntivirusException("405: Method not allowed for service");
+				case 408: //ICAP server gave up waiting for a request from an ICAP client
+					throw new AntivirusException("408: Request timeout");
+				case 500: //Error on the ICAP server, such as "out of disk space"
+					throw new AntivirusException("500: Server error");
+				case 501: // when the ICAP server does not have implemented the RESPMOD option
+					throw new AntivirusException("501: Method not implemented");
+				case 502: //This is an ICAP proxy and proxying produced an error
+					throw new AntivirusException("502: Bad Gateway");
+				case 503: //The ICAP server has exceeded a maximum connection limit associated with this service
+					throw new AntivirusException("503: Service overloaded");
+				case 505:
+					throw new AntivirusException("505: ICAP version not supported by server");
+				default:
+					throw new AntivirusException("Server returned unknown status code:" + statusCode);
+			}
+		}
+		else
+			throw new AntivirusException("Server didn't return a status code");
+
 	}
 }

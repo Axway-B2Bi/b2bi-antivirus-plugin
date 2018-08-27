@@ -93,7 +93,6 @@ public class AntivirusConfigurationHolder
 		switch (prop)
 		{
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_HOSTNAME:
-			{
 				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 250)
 				{
 					logger.error("Antivirus hostname is invalid: \"" + value + "\"");
@@ -105,10 +104,9 @@ public class AntivirusConfigurationHolder
 					if (logger.isDebugEnabled())
 						logger.debug("Antivirus hostname is: " + value);
 				}
-			}
-			break;
+
+				break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_PORT:
-			{
 				try
 				{
 					int portValue = Integer.parseInt(value);
@@ -123,17 +121,14 @@ public class AntivirusConfigurationHolder
 						if (logger.isDebugEnabled())
 							logger.debug("Antivirus port is: " + value);
 					}
-
 				}
 				catch (NumberFormatException nfe)
 				{
 					logger.error("Antivirus port value is invalid: " + value);
 					throw new AntivirusException("Antivirus port is invalid.");
 				}
-			}
-			break;
+				break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_SERVICE:
-			{
 				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 250)
 				{
 					logger.error("Antivirus service name is invalid: \"" + value + "\"");
@@ -145,10 +140,8 @@ public class AntivirusConfigurationHolder
 					if (logger.isDebugEnabled())
 						logger.debug("Antivirus service name is: " + value);
 				}
-			}
-			break;
+				break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_ICAP_SERVER_VERSION:
-			{
 				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 50)
 				{
 					logger.error("The ICAP server version value is invalid: \"" + value + "\"");
@@ -160,24 +153,22 @@ public class AntivirusConfigurationHolder
 					if (logger.isDebugEnabled())
 						logger.debug("The ICAP server version is: " + value);
 				}
-			}
-			break;
+				break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_PREVIEW_SIZE:
-			{
+				String error = "Antivirus preview size value is invalid: \"" + value
+					+ "\", preview size from server will be used.";
 				try
 				{
 					if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 15)
 					{
-						logger.error("Antivirus preview size value is invalid: \"" + value
-							+ "\", preview size from server will be used.");
+						logger.error(error);
 						this.setPreviewSize(-1);
 						return;
 					}
 					int size = Integer.parseInt(value);
 					if (size <= 0)
 					{
-						logger.error("Antivirus preview size value is invalid: \"" + value
-							+ "\", preview size from server will be used.");
+						logger.error(error);
 						this.setPreviewSize(-1);
 					}
 					else
@@ -186,19 +177,15 @@ public class AntivirusConfigurationHolder
 						if (logger.isDebugEnabled())
 							logger.debug("Antivirus preview size is: " + value);
 					}
-
 				}
 				catch (NumberFormatException nfe)
 				{
-					logger.error("Antivirus preview size value is invalid: \"" + value
-						+ "\", preview size from server will be used.");
+					logger.error(error);
 					this.setPreviewSize(-1);
 					return;
 				}
-			}
-			break;
+				break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_RECEIVE_LENGTH:
-			{
 				try
 				{
 					if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 15)
@@ -221,17 +208,14 @@ public class AntivirusConfigurationHolder
 						if (logger.isDebugEnabled())
 							logger.debug("Antivirus standard receive length is: " + value);
 					}
-
 				}
 				catch (NumberFormatException nfe)
 				{
 					logger.error("Antivirus standard receive length is invalid, standard receive length default value  will be used.");
 					this.setStdReceiveLength(8192);
 				}
-			}
-			break;
+				break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_SEND_LENGTH:
-			{
 				try
 				{
 					if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 15)
@@ -261,10 +245,8 @@ public class AntivirusConfigurationHolder
 					logger.error("Antivirus standard send length value is invalid, standard send length default will be used.");
 					this.setStdSendLength(8192);
 				}
-			}
-			break;
+				break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_CONNECTION_TIMEOUT:
-			{
 				try
 				{
 					if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 15)
@@ -294,10 +276,8 @@ public class AntivirusConfigurationHolder
 					this.setConnectionTimeout(10000);
 					return;
 				}
-			}
-			break;
+				break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_REJECT_FILE_ON_ERROR:
-			{
 				if (!StringUtil.isNullEmptyOrBlank(value))
 					switch (value)
 					{
@@ -318,10 +298,8 @@ public class AntivirusConfigurationHolder
 					logger.error("Incorrect value for reject file on error property. Default value will be used: \"true\".");
 				}
 
-			}
-			break;
+				break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_SCAN_FROM_INTEGRATOR:
-			{
 				if (!StringUtil.isNullEmptyOrBlank(value))
 					switch (value)
 					{
@@ -332,19 +310,17 @@ public class AntivirusConfigurationHolder
 								logger.debug("Scan from integrator value is: " + value);
 							break;
 						default:
-							this.setScanFromIntegrator(Boolean.valueOf("false"));
+							this.setScanFromIntegrator(false);
 							logger.error("Incorrect value for scan from integrator property. Default value will be used: \"false\".");
 							break;
 					}
 				else
 				{
-					this.setScanFromIntegrator(Boolean.valueOf("false"));
+					this.setScanFromIntegrator(false);
 					logger.error("Incorrect value for scan from integrator property. Default value will be used: \"false\".");
 				}
-			}
-			break;
+				break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_MAX_FILE_SIZE:
-			{
 				try
 				{
 					if (StringUtil.isNullEmptyOrBlank(value))
@@ -370,10 +346,8 @@ public class AntivirusConfigurationHolder
 					logger.error("Incorrect max file size value. The restriction will not be used.");
 					this.setMaxFileSize(-1);
 				}
-			}
-			break;
+				break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_FILENAME_RESTRICTION:
-			{
 				List<String> filenamePatterns = new ArrayList<>();
 				if (!StringUtil.isNullEmptyOrBlank(value))
 				{
@@ -389,10 +363,8 @@ public class AntivirusConfigurationHolder
 					}
 				}
 				this.setFilenameRestrictions(filenamePatterns);
-			}
-			break;
+				break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_FILE_EXTENSION_RESTRICTION:
-			{
 				List<String> fileExtRestrictions = new ArrayList<>();
 				if (!StringUtil.isNullEmptyOrBlank(value))
 				{
@@ -408,10 +380,8 @@ public class AntivirusConfigurationHolder
 					}
 				}
 				this.setFileExtensionRestriction(fileExtRestrictions);
-			}
-			break;
+				break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_PROTOCOL_RESTRICTION:
-			{
 				List<String> protocolRestrictions = new ArrayList<>();
 				if (!StringUtil.isNullEmptyOrBlank(value))
 				{
@@ -427,10 +397,8 @@ public class AntivirusConfigurationHolder
 					}
 				}
 				this.setProtocolRestrictions(protocolRestrictions);
-			}
-			break;
+				break;
 			case Constants.SCANNER_CONFIGURATION_PROPERTY_PARTNER_NAME_RESTRICTION:
-			{
 				List<String> partnerNameRestrictions = new ArrayList<>();
 				if (!StringUtil.isNullEmptyOrBlank(value))
 				{
@@ -446,9 +414,9 @@ public class AntivirusConfigurationHolder
 					}
 				}
 				this.setPartnerRestrictions(partnerNameRestrictions);
-			}
-			break;
+				break;
 			default:
+				logger.debug("Unknown property: " + prop);
 		}
 	}
 
