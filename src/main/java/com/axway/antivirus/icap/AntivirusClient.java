@@ -99,6 +99,11 @@ public class AntivirusClient
 
 		//HashMap of the key-value pairs of the response
 		Map<String, String> responseMap = parseHeader(parseMe);
+		//Get the value of the Connection property (if present) from the header.
+		//If an error occurred then the value should be "close" and we should close the connection
+		if (responseMap.containsKey("Connection") && responseMap.get("Connection").equalsIgnoreCase("close"))
+			disconnect();
+
 		//Interpret the status code and if it is 200, get the preview size from the response
 		interpretStatusCode(responseMap);
 	}
@@ -180,6 +185,10 @@ public class AntivirusClient
 			{
 				String parseMe = getHeader(ICAPTERMINATOR);
 				responseMap = parseHeader(parseMe);
+				//Get the value of the Connection property (if present) from the header.
+				//If an error occurred then the value should be "close" and we should close the connection
+				if (responseMap.containsKey("Connection") && responseMap.get("Connection").equalsIgnoreCase("close"))
+					disconnect();
 				if (logger.isDebugEnabled())
 					logger.debug("Received server response after preview.");
 				//check to see if the status code is : 100 Continue
@@ -220,6 +229,10 @@ public class AntivirusClient
 
 			String response = getHeader(ICAPTERMINATOR);
 			responseMap = parseHeader(response);
+			//Get the value of the Connection property (if present) from the header.
+			//If an error occurred then the value should be "close" and we should close the connection
+			if (responseMap.containsKey("Connection") && responseMap.get("Connection").equalsIgnoreCase("close"))
+				disconnect();
 			if (logger.isTraceEnabled())
 				logger.trace(SERVER_RESPONSE + response);
 			return interpretStatusCode(responseMap);
