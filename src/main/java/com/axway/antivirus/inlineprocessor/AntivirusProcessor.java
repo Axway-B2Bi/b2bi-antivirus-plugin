@@ -6,6 +6,7 @@ import com.axway.antivirus.icap.AntivirusClient;
 import com.axway.util.StringUtil;
 import com.cyclonecommerce.api.inlineprocessing.Message;
 import com.cyclonecommerce.api.inlineprocessing.MessageProcessor;
+import com.cyclonecommerce.collaboration.MetadataDictionary;
 import com.cyclonecommerce.collaboration.Party;
 import com.cyclonecommerce.collaboration.partyconfiguration.PartyManagerFactory;
 import com.cyclonecommerce.collaboration.transport.ExchangePoint;
@@ -144,6 +145,7 @@ public class AntivirusProcessor implements MessageProcessor
 				message.setMetadata(AV_SCAN_INFO,
 					"Message Infected - rejecting message. Threat: " + client.getFailureReason().toString());
 				message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.INFECTED.getValue());
+				message.setMetadata(MetadataDictionary.SHOULD_NOT_DISPLAY_VIEW_AND_DOWNLOAD_LINKS, "true");
 				temp.delete();
 				return;
 
@@ -169,6 +171,7 @@ public class AntivirusProcessor implements MessageProcessor
 			if (rejectFileOnError)
 			{
 				message.setMetadata(AV_SCAN_INFO, "An error occurred when scanning the file: " + ex.getMessage());
+				message.setMetadata(MetadataDictionary.SHOULD_NOT_DISPLAY_VIEW_AND_DOWNLOAD_LINKS, "true");
 			}
 
 		}
