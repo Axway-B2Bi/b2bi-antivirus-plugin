@@ -3,7 +3,7 @@ The Internet Content Adaptation Protocol (ICAP) Inline Processor allows an admin
 The ICAP functionality for B2Bi is embedded in an Inline Processor. It can be added to a trading pickup as an attribute and as a message handler processing action
 
 ## Configuring the ICAP Inline Processor
-####1. Initial deployment
+### 1. Initial deployment
 After the latest version of B2Bi is installed, and prior to the configuration of ICAP scanning within B2Bi, you must:\
 **NOTE**\
 The folder names may differ depending upon the version of B2Bi that is installed.
@@ -16,7 +16,7 @@ d. Add in B2Bi_installation\Interchange\conf\log4j2.xml file the line:
 
 
 
-###2. Update the avScanner.properties file
+### 2. Update the avScanner.properties file
 The anti-virus inline processor requires the Av-scanning properties to be configured correctly. The properties are auto-documented in the avScanner.properties file.
 Properties include filters that specify which files are not to be scanned, based on criteria such as:
 
@@ -25,7 +25,7 @@ Properties include filters that specify which files are not to be scanned, based
 * protocols
 * partners
 
-###3. Enable the AV-scanning
+### 3. Enable the AV-scanning
 The following procedures explain how to enable AV-scanning in a trading pickup as a message attribute and the inline-processor in a message handler processing action.
 Enable the AV-scanning as a message attribute on a trading pickup
 
@@ -36,7 +36,7 @@ Enable the AV-scanning as a message attribute on a trading pickup
 
 ![Enable the AV-scanning](distributions/screenshots/Enable_the_AV_scanning.jpg)
 
-###4. Enable the AV-scanning in a message handler processing action
+### 4. Enable the AV-scanning in a message handler processing action
 1. Navigate to **Manage Trading Configuration**.
 2. Select a Community.
 3. Select **Processing** from the Community Map.
@@ -51,7 +51,7 @@ The condition contains the attribute set on the trading pickup and click **Next*
 
 ![Enable the AV-scanning](distributions/screenshots/Enable_the_AV-scanning_in_a_message_handler.jpg)
 
-###5. Monitoring the Scan process
+### 5. Monitoring the Scan process
 **Log file ->**
 
 After enabling the virus scan in your configuration, when a file that matches the criteria is scanned, the following entries appear in the Trading Engine log (TE.log), for example:
@@ -63,7 +63,7 @@ After enabling the virus scan in your configuration, when a file that matches th
 2018-08-23 06:18:50,741 - DEBUG [Thread-1028] (AntivirusConfigurationHolder) - Antivirus standard receive length is: 8192\
 2018-08-23 06:18:50,741 - DEBUG [Thread-1028] (AntivirusConfigurationHolder) - The ICAP server version is: 1.0
 
-###5. The Message Tracker
+### 6. The Message Tracker
 In Message Tracker, a metadata attribute is added that indicates the scan status of the message.
 
 ![Enable the AV-scanning](distributions/screenshots/The_Message_Tracker.jpg)
