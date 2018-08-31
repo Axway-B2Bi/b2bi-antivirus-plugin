@@ -4,14 +4,19 @@ The ICAP functionality for B2Bi is embedded in an Inline Processor. It can be ad
 
 ## Configuring the ICAP Inline Processor
 ### 1. Initial deployment
-After the latest version of B2Bi is installed, and prior to the configuration of ICAP scanning within B2Bi, you must:\
-**NOTE**\
+After the latest version of B2Bi is installed, and prior to the configuration of ICAP scanning within B2Bi, you must:
+
+**NOTE**
+
 The folder names may differ depending upon the version of B2Bi that is installed.
 
-a. Locate the avScanner.properties file within this directory: B2Bi_installation\Interchange\samples\icapAv\
-b. Deploy the configuration file (avScanner.properties) in this directory: B2Bi_share\common\conf\avConf. In the case of a B2Bi cluster, repeat this process on all the B2Bi cluster nodes.\
-c. Deploy the generated antivirus-processor-1.0.0.jar file to: B2Bi_installation\Interchange\jars\
-d. Add in B2Bi_installation\Interchange\conf\log4j2.xml file the line: 
+a. Locate the avScanner.properties file within this directory: B2Bi_installation\Interchange\samples\icapAv
+
+b. Deploy the configuration file (avScanner.properties) in this directory: B2Bi_share\common\conf\avConf. In the case of a B2Bi cluster, repeat this process on all the B2Bi cluster nodes.
+
+c. Deploy the generated antivirus-processor-1.0.0.jar file to: B2Bi_installation\Interchange\jars
+
+d. Add in B2Bi_installation\Interchange\conf\log4j2.xml file the line:
 `<Logger name="com.axway.antivirus" level="INFO"/>`
 
 
@@ -52,15 +57,20 @@ The condition contains the attribute set on the trading pickup and click **Next*
 ![Enable the AV-scanning](distributions/screenshots/Enable_the_AV-scanning_in_a_message_handler.jpg)
 
 ### 5. Monitoring the Scan process
-**Log file ->**
+**TE Log file**
 
 After enabling the virus scan in your configuration, when a file that matches the criteria is scanned, the following entries appear in the Trading Engine log (TE.log), for example:
 
-2018-08-23 06:18:50,726 - INFO [Thread-1028] (AntivirusConfigurationWatcher) - Antivirus configuration changed. File affected: avScanner.properties.\
-2018-08-23 06:18:50,726 - INFO [Thread-1028] (AntivirusConfigurationManager) - Scanner configuration not present or modified - attempting to load it.\
-2018-08-23 06:18:50,741 - DEBUG [Thread-1028] (AntivirusConfigurationHolder) - Scan from integrator value is: false\
-2018-08-23 06:18:50,741 - DEBUG [Thread-1028] (AntivirusConfigurationHolder) - Reject file on error value is: true\
-2018-08-23 06:18:50,741 - DEBUG [Thread-1028] (AntivirusConfigurationHolder) - Antivirus standard receive length is: 8192\
+2018-08-23 06:18:50,726 - INFO [Thread-1028] (AntivirusConfigurationWatcher) - Antivirus configuration changed. File affected: avScanner.properties.
+
+2018-08-23 06:18:50,726 - INFO [Thread-1028] (AntivirusConfigurationManager) - Scanner configuration not present or modified - attempting to load it.
+
+2018-08-23 06:18:50,741 - DEBUG [Thread-1028] (AntivirusConfigurationHolder) - Scan from integrator value is: false
+
+2018-08-23 06:18:50,741 - DEBUG [Thread-1028] (AntivirusConfigurationHolder) - Reject file on error value is: true
+
+2018-08-23 06:18:50,741 - DEBUG [Thread-1028] (AntivirusConfigurationHolder) - Antivirus standard receive length is: 8192
+
 2018-08-23 06:18:50,741 - DEBUG [Thread-1028] (AntivirusConfigurationHolder) - The ICAP server version is: 1.0
 
 ### 6. The Message Tracker
@@ -77,6 +87,7 @@ The following diagram illustrates the ICAP file scanning process when the scanni
 
 * If the message received from Interchange has restrictions defined in the **avScanner.properties** file, the Inline processor decides whether to scan the message or not
 * If the message is to be scanned, the dialog between the Inline processor and the ICAP server is as follows:
+
 1. The Inline processor sends the **OPTIONS** request to connect to the ICAP server
 2. The ICAP server indicates which type of request are permitted and gives back the maximum size of the preview the server can use.
 3. The Inline processor sends the message in chunks
