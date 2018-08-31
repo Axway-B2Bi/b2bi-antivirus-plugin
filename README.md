@@ -86,7 +86,7 @@ The following diagram illustrates the ICAP file scanning process when the scanni
 * The message is rejected if it is Infected or if an ERROR occurred
 * The message is send to Integrator for processing.
 
-##Notes and limitations:
+## Notes and limitations:
 1. If the backup option is activated, and the files are infected, a backup of the file is saved on the system.
 2. If the backup option is disabled, the files are deleted directly.
 3. The payload of the infected files cannot be viewed or downloaded from the Message Tracker.
