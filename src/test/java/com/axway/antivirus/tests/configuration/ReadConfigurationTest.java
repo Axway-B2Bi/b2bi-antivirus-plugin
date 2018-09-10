@@ -1,11 +1,13 @@
-package com.axway.antivirus.configuration;
+package com.axway.antivirus.tests.configuration;
+
+import com.axway.antivirus.configuration.AntivirusConfigurationHolder;
+import com.axway.antivirus.configuration.AntivirusConfigurationManager;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -21,7 +23,7 @@ public class ReadConfigurationTest
 	{
 		String pathToConfFile =
 			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator
-				+ "test" + File.separator + "java" + File.separator + "resources" + File.separator
+				+ "test" + File.separator + "java" + File.separator + "com/axway/antivirus/tests/resources" + File.separator
 				+ "avScanner.properties";
 		avConfManager = AntivirusConfigurationManager.getInstance();
 		avConfManager.setConfLoaded(false);
@@ -50,7 +52,7 @@ public class ReadConfigurationTest
 	@Test
 	public void serverVersionTest()
 	{
-		assertEquals("1.0", avHolder.getServerVersion());
+		assertEquals("1.0", avHolder.getICAPServerVersion());
 	}
 
 	@Test

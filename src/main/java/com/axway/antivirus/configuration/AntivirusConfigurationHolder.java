@@ -1,23 +1,21 @@
 package com.axway.antivirus.configuration;
 
-import com.axway.antivirus.exceptions.AntivirusException;
-import com.axway.antivirus.util.Constants;
 import com.axway.util.StringUtil;
-
-import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
+/**
+ * The holder for the properties found in <code>avScanner.properties</code> file
+ */
 public class AntivirusConfigurationHolder
 {
-	private static Logger logger = Logger.getLogger(AntivirusConfigurationHolder.class);
-
 	private String scannerId;
 	private String hostname;
 	private int port;
 	private String service;
-	private String serverVersion;
+	private String ICAPServerVersion;
 	private int previewSize;
 	private int stdReceiveLength;
 	private int stdSendLength;
@@ -30,561 +28,425 @@ public class AntivirusConfigurationHolder
 	private List<String> protocolRestriction;
 	private List<String> partnerNameRestriction;
 
+	/**
+	 * Default constructor
+	 */
 	public AntivirusConfigurationHolder()
 	{
-		//set default values for rejectFileOnError and scanFromIntegrator
-		rejectFileOnError = true;
-		scanFromIntegrator = false;
+		//set default values
+		previewSize = Integer.getInteger(PropertyKey.PREVIEW_SIZE.getDefaultValue());
+		stdSendLength = Integer.getInteger(PropertyKey.STANDARD_SEND_LENGTH.getDefaultValue());
+		stdReceiveLength = Integer.getInteger(PropertyKey.STANDARD_RECEIVE_LENGTH.getDefaultValue());
+		connectionTimeout = Integer.getInteger(PropertyKey.CONNECTION_TIMEOUT.getDefaultValue());
+		rejectFileOnError = Boolean.getBoolean(PropertyKey.REJECT_FILE_ON_ERROR.getDefaultValue());
+		scanFromIntegrator = Boolean.getBoolean(PropertyKey.SCAN_FROM_INTEGRATOR.getDefaultValue());
+		maxFileSize = Integer.getInteger(PropertyKey.MAX_FILE_SIZE.getDefaultValue());
 		fileNameRestriction = new ArrayList<>();
 		fileExtensionRestriction = new ArrayList<>();
 		protocolRestriction = new ArrayList<>();
 		partnerNameRestriction = new ArrayList<>();
-	}
-
-	public AntivirusConfigurationHolder(AntivirusConfigurationHolder template)
-	{
-		fileNameRestriction = new ArrayList<>();
-		fileExtensionRestriction = new ArrayList<>();
-		protocolRestriction = new ArrayList<>();
-		partnerNameRestriction = new ArrayList<>();
-
-		scannerId = template.getScannerId();
-		hostname = template.getHostname();
-		port = template.getPort();
-		service = template.getService();
-		previewSize = template.getPreviewSize();
-		stdReceiveLength = template.getStdReceiveLength();
-		stdSendLength = template.getStdSendLength();
-		connectionTimeout = template.getConnectionTimeout();
-		rejectFileOnError = template.isRejectFileOnError();
-		scanFromIntegrator = template.isScanFromIntegrator();
-		serverVersion = template.getServerVersion();
-		maxFileSize = template.getMaxFileSize();
-		fileNameRestriction.addAll(template.getFilenameRestrictions());
-		protocolRestriction.addAll(template.getProtocolRestrictions());
-		partnerNameRestriction.addAll(template.getRestrictedPartners());
 	}
 
 	/**
-	 * Universal setter method for this bean.
-	 *
-	 * @param prop the member to set. Allowed values are:
-	 * <ul>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_HOSTNAME}</li>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_PORT}</li>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_SERVICE}</li>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_ICAP_SERVER_VERSION}</li>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_PREVIEW_SIZE}</li>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_STANDARD_RECEIVE_LENGTH}</li>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_STANDARD_SEND_LENGTH}</li>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_CONNECTION_TIMEOUT}</li>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_REJECT_FILE_ON_ERROR}</li>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_SCAN_FROM_INTEGRATOR}</li>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_MAX_FILE_SIZE}</li>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_FILENAME_RESTRICTION}</li>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_FILE_EXTENSION_RESTRICTION}</li>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_PROTOCOL_RESTRICTION}</li>
-	 * <li>{@link Constants#SCANNER_CONFIGURATION_PROPERTY_PARTNER_NAME_RESTRICTION}</li>
-	 * </ul>
-	 * @param value the value of the property
+	 * @param id The ID of the scanner
+	 * @param properties Properties of the scanner corresponding to the ID
 	 */
-	public void addProperty(String prop, String value) throws AntivirusException
+	public AntivirusConfigurationHolder(String id, Properties properties)
 	{
-		switch (prop)
-		{
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_HOSTNAME:
-				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 250)
-				{
-					logger.error("Antivirus hostname is invalid: \"" + value + "\"");
-					throw new AntivirusException("Antivirus hostname is invalid");
-				}
-				else
-				{
-					this.setHostname(value);
-					if (logger.isDebugEnabled())
-						logger.debug("Antivirus hostname is: " + value);
-				}
+		scannerId = id;
+		hostname = properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_HOSTNAME);
+		port = Integer.valueOf(properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_PORT));
+		service = properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_SERVICE);
+		ICAPServerVersion = properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_ICAP_SERVER_VERSION);
 
-				break;
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_PORT:
-				try
-				{
-					int portValue = Integer.parseInt(value);
-					if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 5 || portValue < 0)
-					{
-						logger.error("Antivirus port is invalid: \"" + value + "\"");
-						throw new AntivirusException("Antivirus port is invalid");
-					}
-					else
-					{
-						this.setPort(portValue);
-						if (logger.isDebugEnabled())
-							logger.debug("Antivirus port is: " + value);
-					}
-				}
-				catch (NumberFormatException nfe)
-				{
-					logger.error("Antivirus port value is invalid: " + value);
-					throw new AntivirusException("Antivirus port is invalid.");
-				}
-				break;
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_SERVICE:
-				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 250)
-				{
-					logger.error("Antivirus service name is invalid: \"" + value + "\"");
-					throw new AntivirusException("Antivirus service name is invalid");
-				}
-				else
-				{
-					this.setService(value);
-					if (logger.isDebugEnabled())
-						logger.debug("Antivirus service name is: " + value);
-				}
-				break;
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_ICAP_SERVER_VERSION:
-				if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 50)
-				{
-					logger.error("The ICAP server version value is invalid: \"" + value + "\"");
-					throw new AntivirusException("Antivirus server version value is invalid");
-				}
-				else
-				{
-					this.setServerVersion(value);
-					if (logger.isDebugEnabled())
-						logger.debug("The ICAP server version is: " + value);
-				}
-				break;
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_PREVIEW_SIZE:
-				String error = "Antivirus preview size value is invalid: \"" + value
-					+ "\", preview size from server will be used.";
-				try
-				{
-					if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 15)
-					{
-						logger.error(error);
-						this.setPreviewSize(-1);
-						return;
-					}
-					int size = Integer.parseInt(value);
-					if (size <= 0)
-					{
-						logger.error(error);
-						this.setPreviewSize(-1);
-					}
-					else
-					{
-						this.setPreviewSize(size);
-						if (logger.isDebugEnabled())
-							logger.debug("Antivirus preview size is: " + value);
-					}
-				}
-				catch (NumberFormatException nfe)
-				{
-					logger.error(error);
-					this.setPreviewSize(-1);
-					return;
-				}
-				break;
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_RECEIVE_LENGTH:
-				try
-				{
-					if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 15)
-					{
-						logger.error("Antivirus standard receive length value is invalid: \"" + value
-							+ "\", standard receive length default value  will be used.");
-						this.setStdReceiveLength(8192);
-						return;
-					}
-					int receiveLength = Integer.parseInt(value);
-					if (receiveLength <= 0)
-					{
-						logger.error("Antivirus standard receive length value is invalid: \"" + value
-							+ "\", standard receive length default value  will be used.");
-						this.setStdReceiveLength(8192);
-					}
-					else
-					{
-						this.setStdReceiveLength(receiveLength);
-						if (logger.isDebugEnabled())
-							logger.debug("Antivirus standard receive length is: " + value);
-					}
-				}
-				catch (NumberFormatException nfe)
-				{
-					logger.error("Antivirus standard receive length is invalid, standard receive length default value  will be used.");
-					this.setStdReceiveLength(8192);
-				}
-				break;
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_SEND_LENGTH:
-				try
-				{
-					if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 15)
-					{
-						logger.error("Antivirus standard send length value is invalid: \"" + value
-							+ "\", standard send length default will be used.");
-						this.setStdSendLength(8192);
-						return;
-					}
-					int sendLength = Integer.parseInt(value);
-					if (sendLength <= 0)
-					{
-						logger.error("Antivirus standard send length value is invalid: \"" + value
-							+ "\", standard send length default will be used.");
-						this.setStdSendLength(8192);
-					}
-					else
-					{
-						this.setStdSendLength(sendLength);
-						if (logger.isDebugEnabled())
-							logger.debug("Antivirus standard send length is: " + value);
-					}
+		previewSize = Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_PREVIEW_SIZE));
+		stdReceiveLength = Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_RECEIVE_LENGTH));
+		stdSendLength = Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_SEND_LENGTH));
+		connectionTimeout = Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_CONNECTION_TIMEOUT));
+		rejectFileOnError = Boolean.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_REJECT_FILE_ON_ERROR));
+		scanFromIntegrator = Boolean.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_SCAN_FROM_INTEGRATOR));
+		maxFileSize = Long.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_MAX_FILE_SIZE));
 
-				}
-				catch (NumberFormatException nfe)
-				{
-					logger.error("Antivirus standard send length value is invalid, standard send length default will be used.");
-					this.setStdSendLength(8192);
-				}
-				break;
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_CONNECTION_TIMEOUT:
-				try
-				{
-					if (StringUtil.isNullEmptyOrBlank(value) || value.length() > 15)
-					{
-						logger.error("Connection timeout value is invalid, default value will be set.");
-						this.setConnectionTimeout(10000);
-						return;
-					}
-					int timeout = Integer.parseInt(value);
-					if (timeout <= 0)
-					{
-						logger.error(
-							"Connection timeout value is invalid: " + timeout + ". Default value will be set.");
-						this.setConnectionTimeout(10000);
-					}
-					else
-					{
-						this.setConnectionTimeout(timeout);
-						if (logger.isDebugEnabled())
-							logger.debug("Antivirus connection timeout is: " + value);
-
-					}
-				}
-				catch (NumberFormatException nfe)
-				{
-					logger.error("Connection timeout value is invalid, default value will be set.");
-					this.setConnectionTimeout(10000);
-					return;
-				}
-				break;
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_REJECT_FILE_ON_ERROR:
-				if (!StringUtil.isNullEmptyOrBlank(value))
-					switch (value)
-					{
-						case "true":
-						case "false":
-							this.setRejectFileOnError(Boolean.valueOf(value));
-							if (logger.isDebugEnabled())
-								logger.debug("Reject file on error value is: " + value);
-							break;
-						default:
-							this.setRejectFileOnError(Boolean.valueOf("true"));
-							logger.error("Incorrect value for reject file on error property. Default value will be used: \"true\".");
-							break;
-					}
-				else
-				{
-					this.setRejectFileOnError(Boolean.valueOf("true"));
-					logger.error("Incorrect value for reject file on error property. Default value will be used: \"true\".");
-				}
-
-				break;
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_SCAN_FROM_INTEGRATOR:
-				if (!StringUtil.isNullEmptyOrBlank(value))
-					switch (value)
-					{
-						case "true":
-						case "false":
-							this.setScanFromIntegrator(Boolean.valueOf(value));
-							if (logger.isDebugEnabled())
-								logger.debug("Scan from integrator value is: " + value);
-							break;
-						default:
-							this.setScanFromIntegrator(false);
-							logger.error("Incorrect value for scan from integrator property. Default value will be used: \"false\".");
-							break;
-					}
-				else
-				{
-					this.setScanFromIntegrator(false);
-					logger.error("Incorrect value for scan from integrator property. Default value will be used: \"false\".");
-				}
-				break;
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_MAX_FILE_SIZE:
-				try
-				{
-					if (StringUtil.isNullEmptyOrBlank(value))
-					{
-						this.setMaxFileSize(-1);
-						return;
-					}
-					long maxSize = Long.parseLong(value);
-					if (value.length() > 15 || maxSize <= 0)
-					{
-						logger.error("Incorrect max file size value. The restriction will not be used.");
-						this.setMaxFileSize(-1);
-					}
-					else
-					{
-						this.setMaxFileSize(maxSize);
-						if (logger.isDebugEnabled())
-							logger.debug("Antivirus maximum file size is: " + value);
-					}
-				}
-				catch (NumberFormatException nfe)
-				{
-					logger.error("Incorrect max file size value. The restriction will not be used.");
-					this.setMaxFileSize(-1);
-				}
-				break;
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_FILENAME_RESTRICTION:
-				List<String> filenamePatterns = new ArrayList<>();
-				if (!StringUtil.isNullEmptyOrBlank(value))
-				{
-					String[] splitValues = value.split(",");
-					for (String filenamePattern : splitValues)
-					{
-						if (!StringUtil.isNullEmptyOrBlank(filenamePattern))
-						{
-							filenamePatterns.add(filenamePattern);
-							if (logger.isDebugEnabled())
-								logger.debug("File name restriction added: " + filenamePattern);
-						}
-					}
-				}
-				this.setFilenameRestrictions(filenamePatterns);
-				break;
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_FILE_EXTENSION_RESTRICTION:
-				List<String> fileExtRestrictions = new ArrayList<>();
-				if (!StringUtil.isNullEmptyOrBlank(value))
-				{
-					String[] splitValues = value.split(",");
-					for (String fileExtRestriction : splitValues)
-					{
-						if (!StringUtil.isNullEmptyOrBlank(fileExtRestriction))
-						{
-							fileExtRestrictions.add(fileExtRestriction);
-							if (logger.isDebugEnabled())
-								logger.debug("File extension restriction added: " + fileExtRestriction);
-						}
-					}
-				}
-				this.setFileExtensionRestriction(fileExtRestrictions);
-				break;
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_PROTOCOL_RESTRICTION:
-				List<String> protocolRestrictions = new ArrayList<>();
-				if (!StringUtil.isNullEmptyOrBlank(value))
-				{
-					String[] splitValues = value.split(",");
-					for (String protocol : splitValues)
-					{
-						if (!StringUtil.isNullEmptyOrBlank(protocol))
-						{
-							protocolRestrictions.add(protocol);
-							if (logger.isDebugEnabled())
-								logger.debug("Protocol restriction added: " + protocol);
-						}
-					}
-				}
-				this.setProtocolRestrictions(protocolRestrictions);
-				break;
-			case Constants.SCANNER_CONFIGURATION_PROPERTY_PARTNER_NAME_RESTRICTION:
-				List<String> partnerNameRestrictions = new ArrayList<>();
-				if (!StringUtil.isNullEmptyOrBlank(value))
-				{
-					String[] splitValues = value.split(",");
-					for (String partner : splitValues)
-					{
-						if (!StringUtil.isNullEmptyOrBlank(partner))
-						{
-							partnerNameRestrictions.add(partner);
-							if (logger.isDebugEnabled())
-								logger.debug("Partner name restriction added: " + partner);
-						}
-					}
-				}
-				this.setPartnerRestrictions(partnerNameRestrictions);
-				break;
-			default:
-				logger.debug("Unknown property: " + prop);
-		}
+		fileNameRestriction = getRestrictionListOfValues(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_FILENAME_RESTRICTION));
+		fileExtensionRestriction = getRestrictionListOfValues(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_FILE_EXTENSION_RESTRICTION));
+		protocolRestriction = getRestrictionListOfValues(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_PROTOCOL_RESTRICTION));
+		partnerNameRestriction = getRestrictionListOfValues(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_PARTNER_NAME_RESTRICTION));
 	}
 
+	/**
+	 * Returns the value associated with the propertyName from the properties
+	 * If the property doesn't exist in properties, it checks for default values in PropertyKey enum
+	 * If it doesn't have a default value it will return null
+	 *
+	 * @param properties
+	 * @param propertyName
+	 * @return the value for the propertyName or a default value associated or null if none are found
+	 */
+	private String getPropertyOrDefaultValue(Properties properties, String propertyName)
+	{
+		if (!StringUtil.isNullEmptyOrBlank(properties.getProperty(propertyName)))
+			return properties.getProperty(propertyName);
+		else
+		{
+			for (PropertyKey key : PropertyKey.values())
+				if (key.getPropertyName().equalsIgnoreCase(propertyName) && key.getDefaultValue() != null)
+					return key.getDefaultValue();
+		}
+		return null;
+	}
+
+	/**
+	 * Returns a List of values extracted from a String
+	 *
+	 * @param listOfValues The String containing the list of values comma separated
+	 * @return The list of values
+	 */
+
+	private List<String> getRestrictionListOfValues(String listOfValues)
+	{
+		List<String> values = new ArrayList<>();
+		if (!StringUtil.isNullEmptyOrBlank(listOfValues))
+		{
+			String[] splitValues = listOfValues.split(",");
+			for (String value : splitValues)
+			{
+				if (!StringUtil.isNullEmptyOrBlank(value))
+				{
+					values.add(value);
+				}
+			}
+		}
+		return values;
+	}
+
+	/**
+	 * Getter for the scanner id
+	 *
+	 * @return The scanner id value
+	 */
 	public String getScannerId()
 	{
 		return scannerId;
 	}
 
+	/**
+	 * Setter for the scanner id
+	 *
+	 * @param id The id for the scanner
+	 */
 	public void setScannerId(String id)
 	{
 		this.scannerId = id;
 	}
 
+	/**
+	 * Getter for the hostname
+	 *
+	 * @return The hostname value
+	 */
 	public String getHostname()
 	{
 		return hostname;
 	}
 
+	/**
+	 * Setter for the hostname
+	 *
+	 * @param hostname The hostname for the scanner
+	 */
 	public void setHostname(String hostname)
 	{
 		this.hostname = hostname;
 	}
 
+	/**
+	 * Getter for the port
+	 *
+	 * @return The port value
+	 */
 	public int getPort()
 	{
 		return port;
 	}
 
+	/**
+	 * Setter for the port
+	 *
+	 * @param port The port for the scanner
+	 */
 	public void setPort(int port)
 	{
 		this.port = port;
 	}
 
+	/**
+	 * Getter for the service name
+	 *
+	 * @return The service name
+	 */
 	public String getService()
 	{
 		return service;
 	}
 
-	public void setService(String mService)
+	/**
+	 * Setter for the service name
+	 *
+	 * @param service The service name for the scanner
+	 */
+	public void setService(String service)
 	{
-		this.service = mService;
+		this.service = service;
 	}
 
+	/**
+	 * Getter for the connection timeout
+	 *
+	 * @return The connection timeout value
+	 */
 	public int getConnectionTimeout()
 	{
 		return connectionTimeout;
 	}
 
-	public void setConnectionTimeout(int mConnectionTimeout)
+	/**
+	 * Setter for the connection timeout
+	 *
+	 * @param connectionTimeout The connection timeout value for the scanner
+	 */
+	public void setConnectionTimeout(int connectionTimeout)
 	{
-		this.connectionTimeout = mConnectionTimeout;
+		this.connectionTimeout = connectionTimeout;
 	}
 
+	/**
+	 * Getter for the reject file on error flag
+	 *
+	 * @return the reject file on error value
+	 */
 	public boolean isRejectFileOnError()
 	{
 		return rejectFileOnError;
 	}
 
-	public void setRejectFileOnError(boolean mRejectFileOnError)
+	/**
+	 * Setter for the reject file on error flag
+	 *
+	 * @param rejectFileOnError The reject file on error value for the scanner
+	 */
+	public void setRejectFileOnError(boolean rejectFileOnError)
 	{
-		this.rejectFileOnError = mRejectFileOnError;
+		this.rejectFileOnError = rejectFileOnError;
 	}
 
+	/**
+	 * Getter for the preview size value
+	 *
+	 * @return The preview size value
+	 */
 	public int getPreviewSize()
 	{
 		return previewSize;
 	}
 
-	public void setPreviewSize(int mPreviewSize)
+	/**
+	 * Setter for the preview size
+	 *
+	 * @param previewSize The preview size value for the scanner
+	 */
+	public void setPreviewSize(int previewSize)
 	{
-		this.previewSize = mPreviewSize;
+		this.previewSize = previewSize;
 	}
 
+	/**
+	 * Getter for the standard receive length value
+	 *
+	 * @return The standard receive length value
+	 */
 	public int getStdReceiveLength()
 	{
 		return stdReceiveLength;
 	}
 
+	/**
+	 * Setter for the standard receive length value
+	 *
+	 * @param stdReceiveLength The standard receive length value for the scanner
+	 */
 	public void setStdReceiveLength(int stdReceiveLength)
 	{
 		this.stdReceiveLength = stdReceiveLength;
 	}
 
+	/**
+	 * Getter for the standard send length value
+	 *
+	 * @return The standard send length value for the scanner
+	 */
 	public int getStdSendLength()
 	{
 		return stdSendLength;
 	}
 
+	/**
+	 * Setter for the standard send length value
+	 *
+	 * @param stdSendLength The standard send length value for the scanner
+	 */
 	public void setStdSendLength(int stdSendLength)
 	{
 		this.stdSendLength = stdSendLength;
 	}
 
+	/**
+	 * Getter for the max file size value
+	 *
+	 * @return The max file size value
+	 */
 	public long getMaxFileSize()
 	{
 		return maxFileSize;
 	}
 
-	public void setMaxFileSize(long filesizeRestriction)
+	/**
+	 * Setter for the max file size value
+	 *
+	 * @param maxFileSize The max file size value for the scanner
+	 */
+	public void setMaxFileSize(long maxFileSize)
 	{
-		this.maxFileSize = filesizeRestriction;
+		this.maxFileSize = maxFileSize;
 	}
 
+	/**
+	 * Getter for the list of file name restriction value/s
+	 *
+	 * @return The list of file name restriction value/s for the scanner
+	 */
 	public List<String> getFilenameRestrictions()
 	{
 		return fileNameRestriction;
 	}
 
+	/**
+	 * Setter for the file name restriction value/s
+	 *
+	 * @param restrictedFilenamePatterns The List of file name restriction value/s for the scanner
+	 */
 	public void setFilenameRestrictions(List<String> restrictedFilenamePatterns)
 	{
 		this.fileNameRestriction = restrictedFilenamePatterns;
 	}
 
+	/**
+	 * Getter for the list of protocol restriction value/s
+	 *
+	 * @return The list of  protocol restriction value/s for the scanner
+	 */
 	public List<String> getProtocolRestrictions()
 	{
 		return protocolRestriction;
 	}
 
+	/**
+	 * Setter for the list of protocol restriction value/s
+	 *
+	 * @param restrictedProtocols The list of protocol restriction value/s for the scanner
+	 */
 	public void setProtocolRestrictions(List<String> restrictedProtocols)
 	{
 		this.protocolRestriction = restrictedProtocols;
 	}
 
+	/**
+	 * Getter for the list of partner name restriction value/s
+	 *
+	 * @return The list of file partner name restriction value/s for the scanner
+	 */
 	public List<String> getRestrictedPartners()
 	{
 		return partnerNameRestriction;
 	}
 
+	/**
+	 * Setter for the list of partner name restriction value/s
+	 *
+	 * @param restrictedPartners The list of partner name restriction value/s for the scanner
+	 */
 	public void setPartnerRestrictions(List<String> restrictedPartners)
 	{
 		this.partnerNameRestriction = restrictedPartners;
 	}
 
+	/**
+	 * Getter for the list of file extension restriction value/s
+	 *
+	 * @return The file extension restriction value/s for the scanner
+	 */
 	public List<String> getFileExtensionRestriction()
 	{
 		return fileExtensionRestriction;
 	}
 
+	/**
+	 * Setter for the list of file extension restriction vaalue/s
+	 *
+	 * @param fileExtensionRestriction The list of file extension restriction value/s for the scanner
+	 */
 	public void setFileExtensionRestriction(List<String> fileExtensionRestriction)
 	{
 		this.fileExtensionRestriction = fileExtensionRestriction;
 	}
 
-	public String getServerVersion()
+	/**
+	 * Getter for the ICAP server version
+	 *
+	 * @return the ICAP server version
+	 */
+	public String getICAPServerVersion()
 	{
-		return serverVersion;
+		return ICAPServerVersion;
 	}
 
-	public void setServerVersion(String mVersion)
+	/**
+	 * Setter for the ICAP server version
+	 *
+	 * @param version The ICAP server version for the scanner
+	 */
+	public void setICAPServerVersion(String version)
 	{
-		this.serverVersion = mVersion;
+		this.ICAPServerVersion = version;
 	}
 
+	/**
+	 * Getter for the scan from integrator value
+	 *
+	 * @return The scan from integrator value
+	 */
 	public boolean isScanFromIntegrator()
 	{
 		return scanFromIntegrator;
 	}
 
+	/**
+	 * Setter for the scan from integrator value
+	 *
+	 * @param scanFromIntegrator The scan from integrator value for the scanner
+	 */
 	public void setScanFromIntegrator(boolean scanFromIntegrator)
 	{
 		this.scanFromIntegrator = scanFromIntegrator;
 	}
 
+	/**
+	 * @return All the values from the <code>AntivirusConfigurationHolder</code>
+	 */
 	@Override
 	public String toString()
 	{
 		return "AntivirusConfigurationHolder{" + "scannerId='" + scannerId + '\'' + ", hostname='" + hostname + '\''
-			+ ", port=" + port + ", service='" + service + '\'' + ", serverVersion='" + serverVersion + '\''
+			+ ", port=" + port + ", service='" + service + '\'' + ", ICAPServerVersion='" + ICAPServerVersion + '\''
 			+ ", previewSize=" + previewSize + ", stdReceiveLength=" + stdReceiveLength + ", stdSendLength="
 			+ stdSendLength + ", connectionTimeout=" + connectionTimeout + ", rejectFileOnError=" + rejectFileOnError
 			+ ", scanFromIntegrator=" + scanFromIntegrator + ", maxFileSize=" + maxFileSize + ", fileNameRestriction="

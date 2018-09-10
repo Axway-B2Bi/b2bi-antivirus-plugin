@@ -1,7 +1,7 @@
-package com.axway.antivirus.configuration;
+package com.axway.antivirus.tests.tools;
 
-import org.junit.Before;
-import org.junit.Test;
+import com.axway.antivirus.configuration.AntivirusConfigurationHolder;
+import com.axway.antivirus.configuration.AntivirusConfigurationManager;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,34 +13,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNull;
-
-public class ValidateConfigurationTest
+public class PropertyFileUtils
 {
-	private static AntivirusConfigurationManager avConfManager;
-	private static AntivirusConfigurationHolder avConfHolder;
-	private static String pathToConfFile;
-	private static String pathToNewConfFile;
+	private static AntivirusConfigurationHolder avTemplateConfHolder;
+	private static String pathToTemplateFile;
 
-	@Before
-	public void setUp()
+	public PropertyFileUtils()
 	{
-		pathToConfFile =
+		this.pathToTemplateFile =
 			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator + "test"
-				+ File.separator + "java" + File.separator + "resources" + File.separator + "avScanner.properties";
-		pathToNewConfFile =
-			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator + "test"
-				+ File.separator + "java" + File.separator + "resources" + File.separator + "avScanner2.properties";
-
-		avConfManager = AntivirusConfigurationManager.getInstance();
-		avConfManager.setConfLoaded(false);
-		avConfHolder = avConfManager.getScannerConfiguration(pathToConfFile);
+				+ File.separator + "java" + File.separator + "com/axway/antivirus/tests/resources" + File.separator + "avScanner.properties";
+		this.avTemplateConfHolder = AntivirusConfigurationManager.getInstance().getScannerConfiguration(pathToTemplateFile);
 	}
 
-	public File makeFile(String property, String propertyValue) throws IOException
+	public AntivirusConfigurationHolder getAvConfHolderFromTemplate()
 	{
-		File propsFile = new File(pathToNewConfFile);
+		return avTemplateConfHolder;
+	}
+
+	public String getPathToTemplateFile()
+	{
+		return pathToTemplateFile;
+	}
+
+	public File makeFile(String pathToFile, String property, String propertyValue) throws IOException
+	{
+		File propsFile = new File(pathToFile);
 		Map<String, String> contents = new HashMap<>();
 		contents.put("hostname", "antivirusID.hostname=");
 		contents.put("port", "antivirusID.port=");
@@ -74,40 +72,40 @@ public class ValidateConfigurationTest
 				switch (entry.getKey())
 				{
 					case "hostname":
-						writer.write(avConfHolder.getHostname());
+						writer.write(avTemplateConfHolder.getHostname());
 						break;
 					case "port":
-						writer.write(String.valueOf(avConfHolder.getPort()));
+						writer.write(String.valueOf(avTemplateConfHolder.getPort()));
 						break;
 					case "service":
-						writer.write(avConfHolder.getService());
+						writer.write(avTemplateConfHolder.getService());
 						break;
 					case "ICAPServerVersion":
-						writer.write(avConfHolder.getServerVersion());
+						writer.write(avTemplateConfHolder.getICAPServerVersion());
 						break;
 					case "previewSize":
-						writer.write(String.valueOf(avConfHolder.getPreviewSize()));
+						writer.write(String.valueOf(avTemplateConfHolder.getPreviewSize()));
 						break;
 					case "stdSendLength":
-						writer.write(String.valueOf(avConfHolder.getStdSendLength()));
+						writer.write(String.valueOf(avTemplateConfHolder.getStdSendLength()));
 						break;
 					case "stdReceiveLength":
-						writer.write(String.valueOf(avConfHolder.getStdReceiveLength()));
+						writer.write(String.valueOf(avTemplateConfHolder.getStdReceiveLength()));
 						break;
 					case "connectionTimeout":
-						writer.write(String.valueOf(avConfHolder.getConnectionTimeout()));
+						writer.write(String.valueOf(avTemplateConfHolder.getConnectionTimeout()));
 						break;
 					case "rejectFileOnError":
-						writer.write(String.valueOf(avConfHolder.isRejectFileOnError()));
+						writer.write(String.valueOf(avTemplateConfHolder.isRejectFileOnError()));
 						break;
 					case "scanFromIntegrator":
-						writer.write(String.valueOf(avConfHolder.isScanFromIntegrator()));
+						writer.write(String.valueOf(avTemplateConfHolder.isScanFromIntegrator()));
 						break;
 					case "maxFileSize":
-						writer.write(String.valueOf(avConfHolder.getMaxFileSize()));
+						writer.write(String.valueOf(avTemplateConfHolder.getMaxFileSize()));
 						break;
 					case "fileNameRestriction":
-						List<String> fileNameRestrictions = avConfHolder.getFilenameRestrictions();
+						List<String> fileNameRestrictions = avTemplateConfHolder.getFilenameRestrictions();
 						sb = new StringBuilder();
 						if (!fileNameRestrictions.isEmpty())
 							for (String fnRestr : fileNameRestrictions)
@@ -116,7 +114,7 @@ public class ValidateConfigurationTest
 							writer.write(sb.toString().substring(0, sb.length() - 1));
 						break;
 					case "fileExtensionRestriction":
-						List<String> fileExtensionRestrictions = avConfHolder.getFileExtensionRestriction();
+						List<String> fileExtensionRestrictions = avTemplateConfHolder.getFileExtensionRestriction();
 						sb = new StringBuilder();
 						if (!fileExtensionRestrictions.isEmpty())
 							for (String feRestr : fileExtensionRestrictions)
@@ -125,7 +123,7 @@ public class ValidateConfigurationTest
 							writer.write(sb.toString().substring(0, sb.length() - 1));
 						break;
 					case "protocolRestriction":
-						List<String> protocolRestrictions = avConfHolder.getProtocolRestrictions();
+						List<String> protocolRestrictions = avTemplateConfHolder.getProtocolRestrictions();
 						sb = new StringBuilder();
 						if (!protocolRestrictions.isEmpty())
 							for (String prRestr : protocolRestrictions)
@@ -134,7 +132,7 @@ public class ValidateConfigurationTest
 							writer.write(sb.toString().substring(0, sb.length() - 1));
 						break;
 					case "partnerNameRestriction":
-						List<String> partnerNameRestrictions = avConfHolder.getRestrictedPartners();
+						List<String> partnerNameRestrictions = avTemplateConfHolder.getRestrictedPartners();
 						sb = new StringBuilder();
 						if (!partnerNameRestrictions.isEmpty())
 							for (String pnRestr : partnerNameRestrictions)
@@ -150,36 +148,4 @@ public class ValidateConfigurationTest
 		return propsFile;
 	}
 
-	@Test
-	public void noPortTest() throws IOException
-	{
-		File propFile = makeFile("port", "");
-		avConfManager.setConfLoaded(Boolean.valueOf("false"));
-		assertNull(avConfManager.getScannerConfiguration(propFile.getCanonicalPath()));
-	}
-
-	@Test
-	public void noHostnameTest() throws IOException
-	{
-		File propFile = makeFile("hostname", "");
-		avConfManager.setConfLoaded(Boolean.valueOf("false"));
-		assertNull(avConfManager.getScannerConfiguration(propFile.getCanonicalPath()));
-	}
-
-	@Test
-	public void noPartnerRestrictionsTest() throws IOException
-	{
-		File propFile = makeFile("partnerNameRestriction", "");
-		avConfManager.setConfLoaded(Boolean.valueOf("false"));
-		assertEquals(0, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getRestrictedPartners().size());
-	}
-
-	@Test
-	public void noConnectionTimeoutTest() throws IOException
-	{
-		File propFile = makeFile("connectionTimeout", "");
-		avConfManager.setConfLoaded(Boolean.valueOf("false"));
-		//if no connection timeout is specified, the default value <10000> is returned
-		assertEquals(10000, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getConnectionTimeout());
-	}
 }

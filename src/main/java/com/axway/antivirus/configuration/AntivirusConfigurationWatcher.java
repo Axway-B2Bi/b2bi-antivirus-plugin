@@ -15,7 +15,7 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
-import static com.axway.antivirus.util.Constants.FS;
+import static com.axway.antivirus.configuration.Constants.FS;
 
 public class AntivirusConfigurationWatcher implements Runnable
 {
@@ -49,6 +49,14 @@ public class AntivirusConfigurationWatcher implements Runnable
 		}
 		return avWatcherInstance;
 	}
+
+	/**
+	 * Creates a thread to watch for the directory where the <code>avScanner.properties</code> file is.
+	 * Checks for 2 events:
+	 *
+	 * <p>StandardWatchEventKinds.ENTRY_MODIFY -  If the file is modified it sets the flag <code>isConfLoaded</code> to false and reloads the configuration.</p>
+	 * <p>StandardWatchEventKinds.ENTRY_DELETE - If the file is deleted it sets the flag <code>isConfLoaded</code> to false and logs and error</p>
+	 */
 
 	public void run()
 	{

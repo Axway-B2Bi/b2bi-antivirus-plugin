@@ -45,8 +45,12 @@ public class AntivirusClient
 	private int stdSendLength;
 
 	private StringBuilder failureReason;
+	private static final String CONNECTION = "Connection";
+	private static final String CLOSE = "close";
 
 	/**
+	 * Constructor for the ICAP client
+	 *
 	 * @param hostname The IP address to connect to.
 	 * @param serverPort The port in the host to use.
 	 * @param serviceName The service to use (eg. "squidclamav").
@@ -59,9 +63,9 @@ public class AntivirusClient
 	public AntivirusClient(String hostname, int serverPort, String serviceName, String version, int stdPreviewSize,
 		int standardReceiveLength, int standardSendLength, int connectionTimeout)
 	{
-		this.serviceName = serviceName;
 		this.hostname = hostname;
 		this.port = serverPort;
+		this.serviceName = serviceName;
 		this.serverVersion = version;
 		this.stdPreviewSize = stdPreviewSize;
 		this.stdReceiveLength = standardReceiveLength;
@@ -71,10 +75,10 @@ public class AntivirusClient
 
 	/**
 	 * Initializes the socket connection and IO streams. It asks the server for the available options and
-	 * changes settings to match it.
+	 * preview size
 	 *
-	 * @throws IOException
-	 * @throws AntivirusException
+	 * @throws IOException if the data streams cannot be opened
+	 * @throws AntivirusException if cannot open the connection to the ICAP server
 	 **/
 	public void connect() throws IOException, AntivirusException
 	{
@@ -101,7 +105,7 @@ public class AntivirusClient
 		Map<String, String> responseMap = parseHeader(parseMe);
 		//Get the value of the Connection property (if present) from the header.
 		//If an error occurred then the value should be "close" and we should close the connection
-		if (responseMap.containsKey("Connection") && responseMap.get("Connection").equalsIgnoreCase("close"))
+		if (responseMap.containsKey(CONNECTION) && responseMap.get(CONNECTION).equalsIgnoreCase(CLOSE))
 			disconnect();
 
 		//Interpret the status code and if it is 200, get the preview size from the response
@@ -112,8 +116,10 @@ public class AntivirusClient
 	 * Given a file, it will send the file to the server and return true,
 	 * if the server accepts the file. Visa-versa, false if the server rejects it.
 	 *
-	 * @param file Relative or absolute filepath to a file.
-	 * @return Returns true when no infection is found.
+	 * @param file Relative or absolute file path to a file.
+	 * @return Returns a Boolean value if the file is clean or not
+	 * @throws IOException if the file does not exist, or for some other reason cannot be opened for reading
+	 * @throws AntivirusException if we cannot get the header from the response
 	 */
 	public boolean scanFile(File file) throws IOException, AntivirusException
 	{
@@ -187,7 +193,7 @@ public class AntivirusClient
 				responseMap = parseHeader(parseMe);
 				//Get the value of the Connection property (if present) from the header.
 				//If an error occurred then the value should be "close" and we should close the connection
-				if (responseMap.containsKey("Connection") && responseMap.get("Connection").equalsIgnoreCase("close"))
+				if (responseMap.containsKey(CONNECTION) && responseMap.get(CONNECTION).equalsIgnoreCase(CLOSE))
 					disconnect();
 				if (logger.isDebugEnabled())
 					logger.debug("Received server response after preview.");
@@ -218,6 +224,7 @@ public class AntivirusClient
 				}
 				else
 					return false;
+
 				//Closing file transfer.
 				requestBuffer = HTTPTERMINATOR;
 				if (logger.isDebugEnabled())
@@ -229,9 +236,10 @@ public class AntivirusClient
 
 			String response = getHeader(ICAPTERMINATOR);
 			responseMap = parseHeader(response);
+
 			//Get the value of the Connection property (if present) from the header.
 			//If an error occurred then the value should be "close" and we should close the connection
-			if (responseMap.containsKey("Connection") && responseMap.get("Connection").equalsIgnoreCase("close"))
+			if (responseMap.containsKey(CONNECTION) && responseMap.get(CONNECTION).equalsIgnoreCase(CLOSE))
 				disconnect();
 			if (logger.isTraceEnabled())
 				logger.trace(SERVER_RESPONSE + response);
@@ -241,11 +249,11 @@ public class AntivirusClient
 	}
 
 	/**
-	 * Automatically asks for the servers available options and returns the raw response as a String.
+	 * Asks for the servers available options and returns the raw response as a String.
 	 *
 	 * @return String of the servers response.
-	 * @throws IOException
-	 * @throws AntivirusException
+	 * @throws IOException if an error is thrown when reading from the input data stream
+	 * @throws AntivirusException if no header can be found in the response
 	 */
 	private String getOptions() throws IOException, AntivirusException
 	{
@@ -264,10 +272,10 @@ public class AntivirusClient
 	/**
 	 * Receive an expected ICAP header as response of a request. The returned String should be parsed with parseHeader()
 	 *
-	 * @param terminator
+	 * @param terminator The ICAP response terminator
 	 * @return String of the raw response
-	 * @throws IOException
-	 * @throws AntivirusException
+	 * @throws IOException if an error is thrown when reading from the input data stream
+	 * @throws AntivirusException if no header can be found in the response
 	 */
 	private String getHeader(String terminator) throws IOException, AntivirusException
 	{
@@ -340,7 +348,7 @@ public class AntivirusClient
 
 	/**
 	 * Sends a String through the socket connection.
-	 * Used for sending ICAP/HTTP headers.
+	 * Used for sending ICAP headers.
 	 *
 	 * @param requestHeader
 	 * @throws IOException
@@ -368,7 +376,7 @@ public class AntivirusClient
 	/**
 	 * Terminates the socket connecting to the ICAP server.
 	 *
-	 * @throws IOException
+	 * @throws IOException if an I/O error occurs when closing this socket.
 	 */
 	public void disconnect() throws IOException
 	{
@@ -378,6 +386,9 @@ public class AntivirusClient
 		}
 	}
 
+	/**
+	 * @return The failure reason why the message is failed
+	 */
 	public StringBuilder getFailureReason()
 	{
 		return failureReason;
@@ -386,8 +397,8 @@ public class AntivirusClient
 	/**
 	 * Given the response from the server interpret each possible response code
 	 *
-	 * @param responseMap The response packet as a key value pair map.
-	 * @throws AntivirusException
+	 * @param responseMap The response as a key value pair map.
+	 * @throws AntivirusException if it's an error code or if the error code returned by teh server is not in the known error codes
 	 */
 	private Boolean interpretStatusCode(Map<String, String> responseMap) throws AntivirusException
 	{

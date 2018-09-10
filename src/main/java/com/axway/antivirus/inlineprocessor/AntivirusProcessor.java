@@ -3,14 +3,10 @@ package com.axway.antivirus.inlineprocessor;
 import com.axway.antivirus.configuration.AntivirusConfigurationHolder;
 import com.axway.antivirus.configuration.AntivirusConfigurationManager;
 import com.axway.antivirus.icap.AntivirusClient;
-import com.axway.util.StringUtil;
+import com.axway.antivirus.tests.tools.ScanDecider;
 import com.cyclonecommerce.api.inlineprocessing.Message;
 import com.cyclonecommerce.api.inlineprocessing.MessageProcessor;
 import com.cyclonecommerce.collaboration.MetadataDictionary;
-import com.cyclonecommerce.collaboration.Party;
-import com.cyclonecommerce.collaboration.partyconfiguration.PartyManagerFactory;
-import com.cyclonecommerce.collaboration.transport.ExchangePoint;
-import com.cyclonecommerce.collaboration.transport.ExchangePointManager;
 import com.cyclonecommerce.util.file.FileRegistryHelper;
 
 import org.apache.log4j.Logger;
@@ -18,15 +14,18 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 
-import static com.axway.antivirus.util.Constants.FS;
+import static com.axway.antivirus.configuration.Constants.FS;
 
 public class AntivirusProcessor implements MessageProcessor
 {
 	private static final Logger logger = Logger.getLogger(AntivirusProcessor.class.getName());
-	private static final String AV_SCAN_STATUS = "AVScanStatus";
-	private static final String AV_SCAN_INFO = "AVScanInfo";
+	public static final String AV_SCAN_STATUS = "AVScanStatus";
+	public static final String AV_SCAN_INFO = "AVScanInfo";
 
-	private static String avScannerConfFilePath;
+	private static String avScannerConfFilePath = null;
+	private static AntivirusConfigurationManager avManager;
+
+	private AntivirusClient client;
 
 	public enum SCAN_CODES
 	{
@@ -45,13 +44,17 @@ public class AntivirusProcessor implements MessageProcessor
 		}
 	}
 
+	/**
+	 * Get the path to he antivirus scanner properties file <code>avScanner.properties</code>
+	 */
 	static
 	{
 		try
 		{
-			avScannerConfFilePath =
-				FileRegistryHelper.getInstance().getCommonDir().getCanonicalPath() + FS + "conf" + FS + "avConf" + FS
-					+ "avScanner.properties";
+			if (null == avScannerConfFilePath)
+				avScannerConfFilePath =
+					FileRegistryHelper.getInstance().getCommonDir().getCanonicalPath() + FS + "conf" + FS + "avConf"
+						+ FS + "avScanner.properties";
 		}
 		catch (IOException ioex)
 		{
@@ -73,7 +76,7 @@ public class AntivirusProcessor implements MessageProcessor
 		try
 		{
 			//receipts have no content and should not be scanned
-			if (message.getData() == null || message.getData().length() == 0)
+			if (message == null || message.getData() == null || message.getData().length() == 0)
 				return;
 
 			logger.info(
@@ -82,6 +85,7 @@ public class AntivirusProcessor implements MessageProcessor
 			//print the message size in the te log
 			long messageLength = message.getData().length();
 			logger.info("Message size: " + messageLength);
+
 			//print in the te log from which pickup  the message was sent to the inline processor
 			logger.info(
 				"Message sent to the AntivirusProcessor through: \"" + message.getMetadata("PickupName") + "\" pickup");
@@ -90,7 +94,11 @@ public class AntivirusProcessor implements MessageProcessor
 			File temp = message.getData().toFile();
 
 			//get the configuration manager instance
-			AntivirusConfigurationManager avManager = AntivirusConfigurationManager.getInstance();
+			if (null == avManager)
+			{
+				avManager = AntivirusConfigurationManager.getInstance();
+			}
+
 			//get the scanner  configuration
 			AntivirusConfigurationHolder avConfHolder = avManager.getScannerConfiguration(avScannerConfFilePath);
 			if (avConfHolder == null)
@@ -115,12 +123,16 @@ public class AntivirusProcessor implements MessageProcessor
 				return;
 			}
 
-			//check all restrictions from the configuration file
-			if (!shouldScan(message, avConfHolder))
+			//check all restrictions from the configuration file and decide if the file should be scanned by the antivirus
+			ScanDecider scanDecider = new ScanDecider(avConfHolder);
+			if (!scanDecider.isValidForScanning(message))
 				return;
 
 			//instantiate the ICAP client based on the scanner configuration
-			AntivirusClient client = new AntivirusClient(avConfHolder.getHostname(), avConfHolder.getPort(), avConfHolder.getService(), avConfHolder.getServerVersion(), avConfHolder.getPreviewSize(), avConfHolder.getStdReceiveLength(), avConfHolder.getStdSendLength(), avConfHolder.getConnectionTimeout());
+			if (null == client)
+			{
+				client = new AntivirusClient(avConfHolder.getHostname(), avConfHolder.getPort(), avConfHolder.getService(), avConfHolder.getICAPServerVersion(), avConfHolder.getPreviewSize(), avConfHolder.getStdReceiveLength(), avConfHolder.getStdSendLength(), avConfHolder.getConnectionTimeout());
+			}
 
 			//connect to the ICAP client and ask server for OPTIONS
 			client.connect();
@@ -146,22 +158,18 @@ public class AntivirusProcessor implements MessageProcessor
 					"Message Infected - rejecting message. Threat: " + client.getFailureReason().toString());
 				message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.INFECTED.getValue());
 				message.setMetadata(MetadataDictionary.SHOULD_NOT_DISPLAY_VIEW_AND_DOWNLOAD_LINKS, "true");
-				temp.delete();
-				return;
-
 			}
-			temp.delete();
-		}
-		catch (IOException ex)
-		{
 
-			logger.error("IO error occurred when scanning file " + ": " + ex.getMessage());
-			message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.ERROR.getValue());
-			if (rejectFileOnError)
+			final boolean delete = temp.delete();
+			if (delete)
 			{
-				message.setMetadata(AV_SCAN_INFO, "An IO error occurred when scanning the file: " + ex);
+				if (logger.isDebugEnabled())
+					logger.debug("Temp file successfully deleted.");
 			}
-
+			else
+			{
+				logger.warn("Could not delete temp file.");
+			}
 		}
 		catch (Exception ex)
 		{
@@ -171,107 +179,16 @@ public class AntivirusProcessor implements MessageProcessor
 			if (rejectFileOnError)
 			{
 				message.setMetadata(AV_SCAN_INFO, "An error occurred when scanning the file: " + ex.getMessage());
-				message.setMetadata(MetadataDictionary.SHOULD_NOT_DISPLAY_VIEW_AND_DOWNLOAD_LINKS, "true");
 			}
 
 		}
 	}
 
 	/**
-	 * Processes all restrictions from the <code>{avScannerConfFilePath}</code> file
-	 * If a restriction matches the message, return false
-	 * If no restriction matches, return true
+	 * Getter for the <code>avScanner.properties</code> file path
 	 *
-	 * @return a boolean showing if the message should be scanned or not
-	 **/
-	private Boolean shouldScan(Message message, AntivirusConfigurationHolder avConfHolder)
-	{
-		long messageLength = message.getData().length();
-		//message size validation
-		if (messageLength > avConfHolder.getMaxFileSize() && avConfHolder.getMaxFileSize() > 0)
-		{
-			if (logger.isDebugEnabled())
-				logger.debug("Message size is grater than the restriction added in configuration file. Message will not be scanned.");
-			message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.NOTSCANNED.getValue());
-			return false;
-		}
-
-		//file name validation
-		String consumptionFilename = message.getMetadata("ConsumptionFilename");
-		if (!StringUtil.isNullEmptyOrBlank(consumptionFilename) && !avConfHolder.getFilenameRestrictions().isEmpty())
-			for (String fileName : avConfHolder.getFilenameRestrictions())
-			{
-				if (consumptionFilename.equalsIgnoreCase(fileName))
-				{
-					if (logger.isDebugEnabled())
-						logger.debug("File name corresponds to the restriction added in configuration file. Message will not be scanned.");
-					message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.NOTSCANNED.getValue());
-					return false;
-				}
-			}
-
-		//file extension validation
-		String fileExtension = message.getMetadata("ConsumptionFilenameExtension");
-		if (!StringUtil.isNullEmptyOrBlank(fileExtension) && !avConfHolder.getFileExtensionRestriction().isEmpty())
-			for (String fileExt : avConfHolder.getFileExtensionRestriction())
-			{
-				if (fileExtension.replace(".", "").equalsIgnoreCase(fileExt))
-				{
-					if (logger.isDebugEnabled())
-						logger.debug("File extension corresponds to the restriction added in configuration file. Message will not be scanned.");
-					message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.NOTSCANNED.getValue());
-					return false;
-				}
-			}
-
-		//business protocol validation
-		ExchangePoint ep = ExchangePointManager.getInstance().getExchangePoint(message.getMetadata("ConsumptionExchangePointId"));
-		if (ep != null)
-		{
-			String businessProtType = ep.getConsumptionProps().getBusinessProtocolType();
-			if (!StringUtil.isNullEmptyOrBlank(businessProtType) && !avConfHolder.getProtocolRestrictions().isEmpty())
-				for (String protocol : avConfHolder.getProtocolRestrictions())
-				{
-					if (businessProtType.equalsIgnoreCase(protocol))
-					{
-						if (logger.isDebugEnabled())
-							logger.debug("The protocol corresponds to the restriction added in configuration file. Message will not be scanned.");
-						message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.NOTSCANNED.getValue());
-						return false;
-					}
-				}
-		}
-
-		//partner name validation
-		String partner = "";
-		String direction = message.getMetadata("Direction");
-		if (ep != null)
-			if (direction.equalsIgnoreCase("outbound"))
-			{
-				Party party = PartyManagerFactory.getPartyManager().getPartyById(ep.getConsumptionProps().getReceiver());
-				if (party != null)
-					partner = party.getPartyName();
-			}
-			else
-			{
-				Party party = PartyManagerFactory.getPartyManager().getPartyById(ep.getConsumptionProps().getSender());
-				if (party != null)
-					partner = party.getPartyName();
-			}
-		if (!StringUtil.isNullEmptyOrBlank(partner) && !avConfHolder.getRestrictedPartners().isEmpty())
-			for (String partnerName : avConfHolder.getRestrictedPartners())
-			{
-				if (partner.equalsIgnoreCase(partnerName))
-				{
-					if (logger.isDebugEnabled())
-						logger.debug("The receiving party corresponds to the restriction added in configuration file. Message will not be scanned.");
-					message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.NOTSCANNED.getValue());
-					return false;
-				}
-			}
-		return true;
-	}
-
+	 * @return The path of the configuration file
+	 */
 	public static String getAvScannerConfFilePath()
 	{
 		return avScannerConfFilePath;
