@@ -107,6 +107,7 @@ public class AntivirusConfigurationManager
 						//check what kind of properties are missing
 						//if they are mandatory without default values throw an error and stop the scanning
 						//if they are mandatory that have default values show a warning and proceed
+						//if they are optional (restrictions) show an info  and proceed
 						List<PropertyKey> missingMandatoryNoDefaults = configUtil.getMandatoryMissingFieldsNoDefaults(missingProperties);
 						List<PropertyKey> missingMandatoryWithDefaults = configUtil.getMandatoryMissingFieldsWithDefaults(missingProperties);
 						List<PropertyKey> missingRestrictionFields = configUtil.getMissingRestrictionFields(missingProperties);
@@ -118,25 +119,30 @@ public class AntivirusConfigurationManager
 									+ ". Please correct the issue.");
 							throw new IllegalArgumentException("Mandatory fields have incorrect values or are missing.");
 						}
-						else if (!missingMandatoryWithDefaults.isEmpty()) //  mandatory that have default values
+						else
 						{
-							logger.error(
-								"Mandatory fields have incorrect values or are missing. Using default values for scanner id: "
-									+ id + " properties: " + Arrays.toString(missingMandatoryWithDefaults.toArray()));
 							scannerId = id;
 							Properties validKeysFromProperties = configUtil.validateAndGetValidList(properties);
 							AntivirusConfigurationHolder avConfHolder = new AntivirusConfigurationHolder(id, validKeysFromProperties);
 							avServersConfig.put(scannerId, avConfHolder);
-						}
-						else // missing restriction fields
-						{
-							if (logger.isDebugEnabled())
-								logger.debug("Restriction fields are missing: "
+
+							if (missingMandatoryWithDefaults.contains(PropertyKey.MAX_FILE_SIZE))
+							{
+								missingRestrictionFields.add(PropertyKey.MAX_FILE_SIZE);
+								missingMandatoryWithDefaults.remove(PropertyKey.MAX_FILE_SIZE);
+							}
+							if (!missingMandatoryWithDefaults.isEmpty()) //  mandatory that have default values
+							{
+								logger.error(
+									"Mandatory fields have incorrect values or are missing. Using default values for scanner id: "
+										+ id + " properties: "
+										+ Arrays.toString(missingMandatoryWithDefaults.toArray()));
+							}
+							if (!missingRestrictionFields.isEmpty()) // missing restriction fields
+							{
+								logger.info("Restriction fields are missing: "
 									+ Arrays.toString(missingRestrictionFields.toArray()));
-							scannerId = id;
-							Properties validKeysFromProperties = configUtil.validateAndGetValidList(properties);
-							AntivirusConfigurationHolder avConfHolder = new AntivirusConfigurationHolder(id, validKeysFromProperties);
-							avServersConfig.put(scannerId, avConfHolder);
+							}
 						}
 					}
 				}
