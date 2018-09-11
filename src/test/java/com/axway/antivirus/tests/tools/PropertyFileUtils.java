@@ -17,12 +17,21 @@ public class PropertyFileUtils
 {
 	private static AntivirusConfigurationHolder avTemplateConfHolder;
 	private static String pathToTemplateFile;
+	private static String pathToGeneratedFile;
+
+	private static String icapInputFilesFolderPath;
 
 	public PropertyFileUtils()
 	{
 		this.pathToTemplateFile =
 			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator + "test"
-				+ File.separator + "java" + File.separator + "com/axway/antivirus/tests/resources" + File.separator + "avScanner.properties";
+				+ File.separator + "resources" + File.separator + "avScanner.properties";
+		this.pathToGeneratedFile =
+			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator + "test"
+				+ File.separator + "resources" + File.separator + "avScanner.properties_generated";
+		this.icapInputFilesFolderPath =
+			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator + "test"
+				+ File.separator + "resources" + File.separator + "icap-responses" + File.separator;
 		this.avTemplateConfHolder = AntivirusConfigurationManager.getInstance().getScannerConfiguration(pathToTemplateFile);
 	}
 
@@ -34,6 +43,16 @@ public class PropertyFileUtils
 	public String getPathToTemplateFile()
 	{
 		return pathToTemplateFile;
+	}
+
+	public String getPathToGeneratedFile()
+	{
+		return pathToGeneratedFile;
+	}
+
+	public String getIcapInputFilesFolderPath()
+	{
+		return icapInputFilesFolderPath;
 	}
 
 	public File makeFile(String pathToFile, String property, String propertyValue) throws IOException

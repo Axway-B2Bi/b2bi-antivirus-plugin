@@ -34,17 +34,17 @@ public class AntivirusConfigurationHolder
 	public AntivirusConfigurationHolder()
 	{
 		//set default values
-		previewSize = Integer.getInteger(PropertyKey.PREVIEW_SIZE.getDefaultValue());
-		stdSendLength = Integer.getInteger(PropertyKey.STANDARD_SEND_LENGTH.getDefaultValue());
-		stdReceiveLength = Integer.getInteger(PropertyKey.STANDARD_RECEIVE_LENGTH.getDefaultValue());
-		connectionTimeout = Integer.getInteger(PropertyKey.CONNECTION_TIMEOUT.getDefaultValue());
-		rejectFileOnError = Boolean.getBoolean(PropertyKey.REJECT_FILE_ON_ERROR.getDefaultValue());
-		scanFromIntegrator = Boolean.getBoolean(PropertyKey.SCAN_FROM_INTEGRATOR.getDefaultValue());
-		maxFileSize = Integer.getInteger(PropertyKey.MAX_FILE_SIZE.getDefaultValue());
-		fileNameRestriction = new ArrayList<>();
-		fileExtensionRestriction = new ArrayList<>();
-		protocolRestriction = new ArrayList<>();
-		partnerNameRestriction = new ArrayList<>();
+		setPreviewSize(Integer.getInteger(PropertyKey.PREVIEW_SIZE.getDefaultValue()));
+		setStdSendLength(Integer.getInteger(PropertyKey.STANDARD_SEND_LENGTH.getDefaultValue()));
+		setStdReceiveLength(Integer.getInteger(PropertyKey.STANDARD_RECEIVE_LENGTH.getDefaultValue()));
+		setConnectionTimeout(Integer.getInteger(PropertyKey.CONNECTION_TIMEOUT.getDefaultValue()));
+		setRejectFileOnError(Boolean.getBoolean(PropertyKey.REJECT_FILE_ON_ERROR.getDefaultValue()));
+		setScanFromIntegrator(Boolean.getBoolean(PropertyKey.SCAN_FROM_INTEGRATOR.getDefaultValue()));
+		setMaxFileSize(Integer.getInteger(PropertyKey.MAX_FILE_SIZE.getDefaultValue()));
+		setFilenameRestrictions(new ArrayList<String>());
+		setFileExtensionRestriction(new ArrayList<String>());
+		setProtocolRestrictions(new ArrayList<String>());
+		setPartnerRestrictions(new ArrayList<String>());
 	}
 
 	/**
@@ -53,24 +53,24 @@ public class AntivirusConfigurationHolder
 	 */
 	public AntivirusConfigurationHolder(String id, Properties properties)
 	{
-		scannerId = id;
-		hostname = properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_HOSTNAME);
-		port = Integer.valueOf(properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_PORT));
-		service = properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_SERVICE);
-		ICAPServerVersion = properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_ICAP_SERVER_VERSION);
+		setScannerId(id);
+		setHostname(properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_HOSTNAME));
+		setPort(Integer.valueOf(properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_PORT)));
+		setService(properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_SERVICE));
+		setICAPServerVersion(properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_ICAP_SERVER_VERSION));
 
-		previewSize = Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_PREVIEW_SIZE));
-		stdReceiveLength = Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_RECEIVE_LENGTH));
-		stdSendLength = Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_SEND_LENGTH));
-		connectionTimeout = Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_CONNECTION_TIMEOUT));
-		rejectFileOnError = Boolean.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_REJECT_FILE_ON_ERROR));
-		scanFromIntegrator = Boolean.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_SCAN_FROM_INTEGRATOR));
-		maxFileSize = Long.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_MAX_FILE_SIZE));
+		setPreviewSize(Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_PREVIEW_SIZE)));
+		setStdReceiveLength(Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_RECEIVE_LENGTH)));
+		setStdSendLength(Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_SEND_LENGTH)));
+		setConnectionTimeout(Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_CONNECTION_TIMEOUT)));
+		setRejectFileOnError(Boolean.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_REJECT_FILE_ON_ERROR)));
+		setScanFromIntegrator(Boolean.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_SCAN_FROM_INTEGRATOR)));
+		setMaxFileSize(Long.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_MAX_FILE_SIZE)));
 
-		fileNameRestriction = getRestrictionListOfValues(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_FILENAME_RESTRICTION));
-		fileExtensionRestriction = getRestrictionListOfValues(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_FILE_EXTENSION_RESTRICTION));
-		protocolRestriction = getRestrictionListOfValues(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_PROTOCOL_RESTRICTION));
-		partnerNameRestriction = getRestrictionListOfValues(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_PARTNER_NAME_RESTRICTION));
+		setFilenameRestrictions(getRestrictionListOfValues(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_FILENAME_RESTRICTION)));
+		setFileExtensionRestriction(getRestrictionListOfValues(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_FILE_EXTENSION_RESTRICTION)));
+		setProtocolRestrictions(getRestrictionListOfValues(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_PROTOCOL_RESTRICTION)));
+		setPartnerRestrictions(getRestrictionListOfValues(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_PARTNER_NAME_RESTRICTION)));
 	}
 
 	/**

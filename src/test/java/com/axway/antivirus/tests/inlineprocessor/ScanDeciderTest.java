@@ -9,12 +9,12 @@ import com.axway.antivirus.tests.tools.PropertyFileUtils;
 import com.axway.antivirus.tests.tools.ScanDecider;
 import com.cyclonecommerce.api.inlineprocessing.Message;
 
+import org.junit.After;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
@@ -26,10 +26,7 @@ public class ScanDeciderTest
 	private ScanDecider setUp(String property, String value, ExchangePointProvider ep) throws IOException
 	{
 		final PropertyFileUtils propertyFileUtils = new PropertyFileUtils();
-		String pathToTestFile =
-			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator + "test"
-				+ File.separator + "java" + File.separator + "com/axway/antivirus/tests/resources" + File.separator
-				+ "avScanner2.properties";
+		String pathToTestFile = new PropertyFileUtils().getPathToGeneratedFile();
 		propertyFileUtils.makeFile(pathToTestFile, property, value);
 		AntivirusConfigurationManager.getInstance().setConfLoaded(false);
 		final AntivirusConfigurationHolder antivirusConfigurationHolder = AntivirusConfigurationManager.getInstance().getScannerConfiguration(pathToTestFile);
@@ -37,6 +34,13 @@ public class ScanDeciderTest
 			return new ScanDecider(antivirusConfigurationHolder);
 		else
 			return new ScanDecider(ep, antivirusConfigurationHolder);
+	}
+
+	@After
+	public void cleanAfter()
+	{
+		File clientRequests = new File(new PropertyFileUtils().getPathToGeneratedFile());
+		clientRequests.delete();
 	}
 
 	@Test
@@ -85,5 +89,4 @@ public class ScanDeciderTest
 		PrepareForTests.assertOnList(metaNameCaptor.getAllValues(), "AVScanStatus");
 		PrepareForTests.assertOnList(metaValueCaptor.getAllValues(), AntivirusProcessor.SCAN_CODES.NOTSCANNED.getValue());
 	}
-
 }

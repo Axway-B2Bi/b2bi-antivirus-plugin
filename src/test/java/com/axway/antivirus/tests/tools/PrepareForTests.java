@@ -1,5 +1,6 @@
 package com.axway.antivirus.tests.tools;
 
+import com.axway.antivirus.configuration.AntivirusConfigurationHolder;
 import com.axway.antivirus.exceptions.AntivirusException;
 import com.axway.antivirus.icap.AntivirusClient;
 import com.cyclonecommerce.api.inlineprocessing.Message;
@@ -36,6 +37,14 @@ public class PrepareForTests
 		when(avClientMock.getFailureReason()).thenReturn(failureReason);
 
 		return avClientMock;
+	}
+
+	public static AntivirusClient prepareRealClient()
+	{
+		AntivirusConfigurationHolder avConfHolder = new PropertyFileUtils().getAvConfHolderFromTemplate();
+		AntivirusClient antivirusClient = new AntivirusClient(avConfHolder.getHostname(), avConfHolder.getPort(), avConfHolder.getService(), avConfHolder.getICAPServerVersion(), avConfHolder.getPreviewSize(), avConfHolder.getStdReceiveLength(), avConfHolder.getStdSendLength(), avConfHolder.getConnectionTimeout());
+
+		return antivirusClient;
 	}
 
 	public static void assertOnList(final List<String> retrievedValues, String... expectedValues)

@@ -223,7 +223,7 @@ public class ConfigUtil
 	}
 
 	/**
-	 * Iterates through the list of {@link PropertyKey} that are missing or have invalid values and returns teh ones that have a validation strategy
+	 * Iterates through the list of {@link PropertyKey} that are missing or have invalid values and returns the ones that have a validation strategy
 	 *
 	 * @param keys The list of {@link PropertyKey} that are missing or have invalid values
 	 * @return A list of {@link PropertyKey} which are in the list of {@link PropertyKey} that are missing or have invalid values and don't have a validation strategy

@@ -1,0 +1,11 @@
+ICAP/1.0 100 Continue
+
+
+ICAP/1.0 200 OK
+Server: C-ICAP/0.4.2
+Connection: keep-alive
+ISTag: CI0001-1-squidclamav-10
+X-Virus-ID: Eicar-Test-Signature
+X-Infection-Found: Type=0; Resolution=2; Threat=Eicar-Test-Signature;
+Encapsulated: res-hdr=0, res-body=445
+

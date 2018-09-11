@@ -16,7 +16,6 @@ import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -121,9 +120,7 @@ public class AntivirusProcessorTest
 		final Message msgMock = PrepareForTests.prepareMessage(45L);
 		final AntivirusConfigurationManager antivirusConfigurationManager = AntivirusConfigurationManager.getInstance();
 		PropertyFileUtils propertyFileUtils = new PropertyFileUtils();
-		String pathToTestFile =
-			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator + "test"
-				+ File.separator + "java" + File.separator + "com/axway/antivirus/tests/resources" + File.separator + "avScanner2.properties";
+		String pathToTestFile = new PropertyFileUtils().getPathToGeneratedFile();
 		propertyFileUtils.makeFile(pathToTestFile, "scanFromIntegrator", "true");
 		when(msgMock.getMetadata("Direction")).thenReturn("Internal");
 
@@ -151,5 +148,12 @@ public class AntivirusProcessorTest
 		InjectionUtils.injectField(antivirusProcessorCleanInj, AntivirusProcessor.class, "client", null);
 		InjectionUtils.injectField(antivirusProcessorCleanInj, AntivirusProcessor.class, "avManager", null);
 		InjectionUtils.injectField(antivirusProcessorCleanInj, AntivirusProcessor.class, "avScannerConfFilePath", null);
+	}
+
+	@After
+	public void cleanAfter()
+	{
+		File clientRequests = new File(new PropertyFileUtils().getPathToGeneratedFile());
+		clientRequests.delete();
 	}
 }

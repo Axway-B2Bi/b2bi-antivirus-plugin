@@ -119,7 +119,7 @@ public class InjectionUtils
 	 * @param argTypes the types of the arguments of the method to inject
 	 * @param args the list of arguments to inject
 	 * @param <T> the type of the object to inject
-	 * @param <U> teh type of the result
+	 * @param <U> the type of the result
 	 * @return the value returned by the injected method
 	 * @throws SecurityException if the request is denied.
 	 * @throws NoSuchMethodException if a method with the specified name is not found.

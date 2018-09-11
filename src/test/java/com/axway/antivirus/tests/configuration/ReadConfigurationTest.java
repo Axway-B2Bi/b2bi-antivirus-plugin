@@ -2,12 +2,10 @@ package com.axway.antivirus.tests.configuration;
 
 import com.axway.antivirus.configuration.AntivirusConfigurationHolder;
 import com.axway.antivirus.configuration.AntivirusConfigurationManager;
+import com.axway.antivirus.tests.tools.PropertyFileUtils;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -21,13 +19,9 @@ public class ReadConfigurationTest
 	@Before
 	public void setUp()
 	{
-		String pathToConfFile =
-			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator
-				+ "test" + File.separator + "java" + File.separator + "com/axway/antivirus/tests/resources" + File.separator
-				+ "avScanner.properties";
 		avConfManager = AntivirusConfigurationManager.getInstance();
 		avConfManager.setConfLoaded(false);
-		avHolder = avConfManager.getScannerConfiguration(pathToConfFile);
+		avHolder = avConfManager.getScannerConfiguration(new PropertyFileUtils().getPathToTemplateFile());
 
 	}
 

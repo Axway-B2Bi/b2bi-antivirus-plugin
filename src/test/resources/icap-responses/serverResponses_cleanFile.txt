@@ -1,0 +1,8 @@
+ICAP/1.0 100 Continue
+
+
+ICAP/1.0 204 Unmodified
+Server: C-ICAP/0.4.2
+Connection: keep-alive
+ISTag: CI0001-1-squidclamav-10
+

@@ -90,11 +90,11 @@ public class AntivirusClient
 		//set the connection timeout
 		client.setSoTimeout(this.connectionTimeout);
 
-		//Openening out stream
+		//Opening out stream
 		OutputStream outToServer = client.getOutputStream();
 		out = new DataOutputStream(outToServer);
 
-		//Openening in stream
+		//Opening in stream
 		InputStream inFromServer = client.getInputStream();
 		in = new DataInputStream(inFromServer);
 
@@ -398,9 +398,9 @@ public class AntivirusClient
 	 * Given the response from the server interpret each possible response code
 	 *
 	 * @param responseMap The response as a key value pair map.
-	 * @throws AntivirusException if it's an error code or if the error code returned by teh server is not in the known error codes
+	 * @throws AntivirusException if it's an error code or if the error code returned by the server is not in the known error codes
 	 */
-	private Boolean interpretStatusCode(Map<String, String> responseMap) throws AntivirusException
+	public Boolean interpretStatusCode(Map<String, String> responseMap) throws AntivirusException
 	{
 		String statusString = responseMap.get(STATUS_CODE);
 		if (!StringUtil.isNullEmptyOrBlank(statusString))
@@ -424,7 +424,7 @@ public class AntivirusClient
 						{
 							int serverPreviewSize = Integer.parseInt(tempString);
 							//the preview size will be set from the server or from the configuration file only if it is smaller than what the server returned
-							if (this.stdPreviewSize == -1 || this.stdPreviewSize > serverPreviewSize)
+							if (this.stdPreviewSize > serverPreviewSize)
 								this.stdPreviewSize = serverPreviewSize;
 							logger.info(
 								"Preview size received from server: " + serverPreviewSize + ". Using preview size: "
