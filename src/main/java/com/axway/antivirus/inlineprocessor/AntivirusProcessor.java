@@ -3,7 +3,7 @@ package com.axway.antivirus.inlineprocessor;
 import com.axway.antivirus.configuration.AntivirusConfigurationHolder;
 import com.axway.antivirus.configuration.AntivirusConfigurationManager;
 import com.axway.antivirus.icap.AntivirusClient;
-import com.axway.antivirus.tests.tools.ScanDecider;
+import com.axway.antivirus.tools.ScanDecider;
 import com.cyclonecommerce.api.inlineprocessing.Message;
 import com.cyclonecommerce.api.inlineprocessing.MessageProcessor;
 import com.cyclonecommerce.collaboration.MetadataDictionary;

@@ -6,7 +6,7 @@ import com.axway.antivirus.inlineprocessor.AntivirusProcessor;
 import com.axway.antivirus.providers.ExchangePointProvider;
 import com.axway.antivirus.tests.tools.PrepareForTests;
 import com.axway.antivirus.tests.tools.PropertyFileUtils;
-import com.axway.antivirus.tests.tools.ScanDecider;
+import com.axway.antivirus.tools.ScanDecider;
 import com.cyclonecommerce.api.inlineprocessing.Message;
 
 import org.junit.After;

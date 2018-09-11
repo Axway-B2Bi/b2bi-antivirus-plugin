@@ -1,4 +1,4 @@
-package com.axway.antivirus.tests.tools;
+package com.axway.antivirus.tools;
 
 import com.axway.antivirus.configuration.AntivirusConfigurationHolder;
 import com.axway.antivirus.inlineprocessor.AntivirusProcessor;
