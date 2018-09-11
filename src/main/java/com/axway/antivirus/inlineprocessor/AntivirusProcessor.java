@@ -179,6 +179,7 @@ public class AntivirusProcessor implements MessageProcessor
 			if (rejectFileOnError)
 			{
 				message.setMetadata(AV_SCAN_INFO, "An error occurred when scanning the file: " + ex.getMessage());
+				message.setMetadata(MetadataDictionary.SHOULD_NOT_DISPLAY_VIEW_AND_DOWNLOAD_LINKS, "true");
 			}
 
 		}
