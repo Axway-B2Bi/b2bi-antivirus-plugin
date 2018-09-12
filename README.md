@@ -14,7 +14,7 @@ a. Locate the avScanner.properties file within this directory: B2Bi_installation
 
 b. Deploy the configuration file (avScanner.properties) in this directory: B2Bi_share\common\conf\avConf. In the case of a B2Bi cluster, repeat this process on all the B2Bi cluster nodes.
 
-c. Deploy the generated antivirus-processor-1.0.0.jar file to: B2Bi_installation\Interchange\jars
+c. Deploy the generated antivirus-processor-1.0.0-1.jar file to: B2Bi_installation\Interchange\jars
 
 d. Add in B2Bi_installation\Interchange\conf\log4j2.xml file the line:
 `<Logger name="com.axway.antivirus" level="INFO"/>`
@@ -26,7 +26,8 @@ The anti-virus inline processor requires the Av-scanning properties to be config
 Properties include filters that specify which files are not to be scanned, based on criteria such as:
 
 * max file size
-* file extensions and/or file names
+* file extensions 
+* file names
 * protocols
 * partners
 
@@ -39,7 +40,7 @@ Enable the AV-scanning as a message attribute on a trading pickup
 3. Add a fixed value to messages called for instance AVScan and set a value
 4. Save the Trading pickup definition.
 
-![Enable the AV-scanning](distributions/screenshots/Enable_the_AV_scanning.jpg)
+![Enable the AV-scanning](dist/screenshots/Enable_the_AV_scanning.jpg)
 
 ### 4. Enable the AV-scanning in a message handler processing action
 1. Navigate to **Manage Trading Configuration**.
@@ -54,7 +55,7 @@ The condition contains the attribute set on the trading pickup and click **Next*
 9. Click **Next**.
 10. Provide a friendly name and click **Finish**.
 
-![Enable the AV-scanning](distributions/screenshots/Enable_the_AV-scanning_in_a_message_handler.jpg)
+![Enable the AV-scanning](dist/screenshots/Enable_the_AV-scanning_in_a_message_handler.jpg)
 
 ### 5. Monitoring the Scan process
 **TE Log file**
@@ -76,14 +77,14 @@ After enabling the virus scan in your configuration, when a file that matches th
 ### 6. The Message Tracker
 In Message Tracker, a metadata attribute is added that indicates the scan status of the message.
 
-![Enable the AV-scanning](distributions/screenshots/The_Message_Tracker.jpg)
+![Enable the AV-scanning](dist/screenshots/The_Message_Tracker.jpg)
 
-![Enable the AV-scanning](distributions/screenshots/The_Message_Details.jpg)
+![Enable the AV-scanning](dist/screenshots/The_Message_Details.jpg)
 
 ## How the scanning process works
 The following diagram illustrates the ICAP file scanning process when the scanning option is activated:
 
-![Enable the AV-scanning](distributions/screenshots/The_Scanning_Process.jpg)
+![Enable the AV-scanning](dist/screenshots/The_Scanning_Process.jpg)
 
 * If the message received from Interchange has restrictions defined in the **avScanner.properties** file, the Inline processor decides whether to scan the message or not
 * If the message is to be scanned, the dialog between the Inline processor and the ICAP server is as follows:
