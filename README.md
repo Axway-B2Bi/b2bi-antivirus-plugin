@@ -106,7 +106,3 @@ The following diagram illustrates the ICAP file scanning process when the scanni
 * the infected attachment is not sent to processing
 * In the original message, the link for the failed attachment is still available
 B2Bi
-
-## Documentation
-#### How to install the (opensource) ICAP antivirus server 
-https://techweb.axway.com/confluence/display/RDBTOBI/Icap+antivirus+server+install
