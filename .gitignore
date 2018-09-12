@@ -10,9 +10,6 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-#Include the solution jar
-!distributions/antivirus-processor*.jar
-
 # Package Files #
 *.jar
 *.war
@@ -28,3 +25,6 @@ hs_err_pid*
 .idea/
 *.iml
 target/
+
+#Include the solution jar
+!distributions/antivirus-processor*.jar
