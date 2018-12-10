@@ -102,8 +102,10 @@ public class AntivirusConfigurationWatcher implements Runnable
 				}
 				if (isFileModified())
 				{
+					setFileModified(false);
 					AntivirusConfigurationManager.setConfLoaded(false);
-					AntivirusConfigurationManager.getInstance().getScannerConfiguration(AntivirusProcessor.getAvScannerConfFilePath());
+                    // force reload
+                    AntivirusConfigurationManager.getInstance().getScannerConfiguration(AntivirusProcessor.getAvScannerConfFilePath(), "");
 				}
 			}
 		}

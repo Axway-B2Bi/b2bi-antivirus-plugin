@@ -48,11 +48,10 @@
 	</build>
 
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/log4j/log4j -->
 		<dependency>
 			<groupId>com.axway.interchange</groupId>
 			<artifactId>interchange-server</artifactId>
-			<version>6.7.0-SNAPSHOT</version>
+			<version>6.7.0-1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>*</groupId>

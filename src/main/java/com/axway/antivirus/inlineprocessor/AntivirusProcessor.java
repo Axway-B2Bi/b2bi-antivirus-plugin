@@ -4,6 +4,7 @@ import com.axway.antivirus.configuration.AntivirusConfigurationHolder;
 import com.axway.antivirus.configuration.AntivirusConfigurationManager;
 import com.axway.antivirus.icap.AntivirusClient;
 import com.axway.antivirus.tools.ScanDecider;
+import com.axway.util.StringUtil;
 import com.cyclonecommerce.api.inlineprocessing.Message;
 import com.cyclonecommerce.api.inlineprocessing.MessageProcessor;
 import com.cyclonecommerce.collaboration.MetadataDictionary;
@@ -24,6 +25,8 @@ public class AntivirusProcessor implements MessageProcessor
 
 	private static String avScannerConfFilePath = null;
 	private static AntivirusConfigurationManager avManager;
+
+    private String scannerId = ""; //Unless the inline processor is configured with a parameter, the inline will use the last scanner id it finds in the configuration file
 
 	private AntivirusClient client;
 
@@ -65,7 +68,10 @@ public class AntivirusProcessor implements MessageProcessor
 	@Override
 	public void setParameters(String parameters)
 	{
-		//something here
+        if(parameters != null && parameters.length() > 0)
+        {
+            this.scannerId = parameters;
+        }
 	}
 
 	@Override
@@ -100,12 +106,12 @@ public class AntivirusProcessor implements MessageProcessor
 			}
 
 			//get the scanner  configuration
-			AntivirusConfigurationHolder avConfHolder = avManager.getScannerConfiguration(avScannerConfFilePath);
+			AntivirusConfigurationHolder avConfHolder = avManager.getScannerConfiguration(avScannerConfFilePath, scannerId);
 			if (avConfHolder == null)
 			{
 				message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.ERROR.getValue());
 				message.setMetadata(AV_SCAN_INFO, "Antivirus configuration file is corrupt; check logs for more details.");
-				logger.error("Antivirus configuration file is corrupt; message will be rejected.");
+				logger.error("Antivirus configuration file is corrupt (requested scannerId: " + scannerId + "); message will be rejected.");
 				return;
 			}
 			//print in the te log the configuration used for this message
@@ -151,11 +157,16 @@ public class AntivirusProcessor implements MessageProcessor
 			}
 			else
 			{
+				String errorMessage;
+				//if the failure reason is empty - the message was correctly sent to the icap server but the antivirus
+				// didn't provide information about the file, meaning it might not be scanned
+				if (StringUtil.isNullEmptyOrBlank(client.getFailureReason().toString()))
+					errorMessage = "Message successfully sent to the ICAP server but not scanned by the antivirus. Check the antivirus configuration.";
+				else
+					errorMessage = "Message Infected - rejecting message. Threat: " + client.getFailureReason().toString();
 				//the antivirus found a threat, reject the message
 				//the actual reject is done in the MessageProcessorExecutor class based on the metadata from the message
-				logger.error("Message Infected - rejecting message. Threat: " + client.getFailureReason().toString());
-				message.setMetadata(AV_SCAN_INFO,
-					"Message Infected - rejecting message. Threat: " + client.getFailureReason().toString());
+				message.setMetadata(AV_SCAN_INFO, errorMessage);
 				message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.INFECTED.getValue());
 				message.setMetadata(MetadataDictionary.SHOULD_NOT_DISPLAY_VIEW_AND_DOWNLOAD_LINKS, "true");
 			}

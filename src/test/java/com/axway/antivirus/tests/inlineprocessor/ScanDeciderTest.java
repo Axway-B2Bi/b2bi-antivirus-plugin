@@ -29,7 +29,7 @@ public class ScanDeciderTest
 		String pathToTestFile = new PropertyFileUtils().getPathToGeneratedFile();
 		propertyFileUtils.makeFile(pathToTestFile, property, value);
 		AntivirusConfigurationManager.getInstance().setConfLoaded(false);
-		final AntivirusConfigurationHolder antivirusConfigurationHolder = AntivirusConfigurationManager.getInstance().getScannerConfiguration(pathToTestFile);
+		final AntivirusConfigurationHolder antivirusConfigurationHolder = AntivirusConfigurationManager.getInstance().getScannerConfiguration(pathToTestFile, "");
 		if (null == ep)
 			return new ScanDecider(antivirusConfigurationHolder);
 		else

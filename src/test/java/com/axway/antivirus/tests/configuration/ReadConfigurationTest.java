@@ -21,7 +21,7 @@ public class ReadConfigurationTest
 	{
 		avConfManager = AntivirusConfigurationManager.getInstance();
 		avConfManager.setConfLoaded(false);
-		avHolder = avConfManager.getScannerConfiguration(new PropertyFileUtils().getPathToTemplateFile());
+		avHolder = avConfManager.getScannerConfiguration(new PropertyFileUtils().getPathToTemplateFile(), "antivirusID");
 
 	}
 

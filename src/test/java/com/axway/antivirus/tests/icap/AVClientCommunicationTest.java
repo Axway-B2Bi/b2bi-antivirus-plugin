@@ -60,7 +60,7 @@ public class AVClientCommunicationTest
 		InjectionUtils.injectField(sut, AntivirusClient.class, "in", dis);
 
 		assertFalse(sut.scanFile(new File(new PropertyFileUtils().getPathToTemplateFile())));
-		assertEquals("X-Infection-Found: Type=0; Resolution=2; Threat=Eicar-Test-Signature;X-Virus-ID: Eicar-Test-Signature", sut.getFailureReason().toString());
+		assertEquals("X-Infection-Found: Type=0; Resolution=2; Threat=Eicar-Test-Signature; X-Virus-ID: Eicar-Test-Signature", sut.getFailureReason().toString());
 	}
 
 	@Test(expected = AntivirusException.class)

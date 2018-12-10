@@ -111,9 +111,10 @@ public class ConfigUtil
 		Set<String> scannerIds = getIDs();
 		Map<String, Properties> propertiesMap = new HashMap<>();
 		Properties keyValuePairs;
-		Enumeration<String> enums = (Enumeration<String>)properties.propertyNames();
 		for (String id : scannerIds)
 		{
+            @SuppressWarnings("unchecked")
+            Enumeration<String> enums = (Enumeration<String>)(properties.propertyNames());
 			keyValuePairs = new Properties();
 			while (enums.hasMoreElements())
 			{

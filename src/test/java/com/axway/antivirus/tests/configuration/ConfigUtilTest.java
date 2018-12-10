@@ -15,6 +15,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ConfigUtilTest
 {
@@ -37,15 +38,16 @@ public class ConfigUtilTest
 	public void getIdsTest()
 	{
 		Set<String> ids = configUtil.getIDs();
-		assertEquals(1, ids.size());
-		assertEquals("antivirusID", ids.iterator().next());
+		assertEquals(2, ids.size());
+		assertTrue(ids.contains("antivirusID"));
+		assertTrue(ids.contains("antivirusID2"));
 	}
 
 	@Test
 	public void getKeyValuePairsByIdTest()
 	{
 		Map<String, Properties> keyValuePairsById = configUtil.getKeyValuePairsById();
-		assertEquals(1, keyValuePairsById.keySet().size());
+		assertEquals(2, keyValuePairsById.keySet().size());
 		assertEquals(15, keyValuePairsById.get("antivirusID").size());
 	}
 

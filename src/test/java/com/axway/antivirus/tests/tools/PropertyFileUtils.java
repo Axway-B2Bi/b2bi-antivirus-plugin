@@ -32,7 +32,7 @@ public class PropertyFileUtils
 		this.icapInputFilesFolderPath =
 			Paths.get(".").toAbsolutePath().normalize().toString() + File.separator + "src" + File.separator + "test"
 				+ File.separator + "resources" + File.separator + "icap-responses" + File.separator;
-		this.avTemplateConfHolder = AntivirusConfigurationManager.getInstance().getScannerConfiguration(pathToTemplateFile);
+		this.avTemplateConfHolder = AntivirusConfigurationManager.getInstance().getScannerConfiguration(pathToTemplateFile, "");
 	}
 
 	public AntivirusConfigurationHolder getAvConfHolderFromTemplate()

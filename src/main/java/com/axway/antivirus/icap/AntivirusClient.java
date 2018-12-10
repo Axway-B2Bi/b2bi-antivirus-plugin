@@ -17,6 +17,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import static java.util.Arrays.copyOfRange;
 
 public class AntivirusClient
 {
@@ -207,7 +208,7 @@ public class AntivirusClient
 					int bytesRead;
 					while ((bytesRead = fileInStream.read(buffer)) != -1)
 					{
-						sendString(Integer.toHexString(buffer.length) + LINETERMINATOR);
+						sendString(Integer.toHexString(bytesRead) + LINETERMINATOR);
 						if (logger.isDebugEnabled())
 						{
 							logger.debug("Sending chunk number: " + chunkNumber + " - " + bytesRead + " bytes.");
@@ -215,10 +216,10 @@ public class AntivirusClient
 						}
 						if (logger.isTraceEnabled())
 						{
-							String bufferString = new String(buffer, StandardCharsetsUTF8);
+							String bufferString = new String(copyOfRange(buffer, 0, bytesRead), StandardCharsetsUTF8);
 							logger.trace("Chunk sent: " + bufferString);
 						}
-						sendBytes(buffer);
+						sendBytes(copyOfRange(buffer, 0, bytesRead));
 						sendString(LINETERMINATOR);
 					}
 				}
@@ -290,7 +291,7 @@ public class AntivirusClient
 			offset += n;
 			if (offset > endofheader.length + 13)
 			{ // 13 is the smallest possible message "ICAP/1.0 xxx "
-				byte[] lastBytes = Arrays.copyOfRange(buffer, offset - endofheader.length, offset);
+				byte[] lastBytes = copyOfRange(buffer, offset - endofheader.length, offset);
 				if (Arrays.equals(endofheader, lastBytes))
 				{
 					return new String(buffer, 0, offset, StandardCharsetsUTF8);
@@ -394,6 +395,18 @@ public class AntivirusClient
 		return failureReason;
 	}
 
+    /**
+     * @return Dump responsemap to trading engine log for debug purposes
+     *
+     */
+    public void dumpResponseMap( Map<String,String> responseMap )
+    {
+        for (String key : responseMap.keySet())
+        {
+            logger.debug("Response: " + key + ": " + responseMap.get(key));
+        }
+    }
+
 	/**
 	 * Given the response from the server interpret each possible response code
 	 *
@@ -402,6 +415,9 @@ public class AntivirusClient
 	 */
 	public Boolean interpretStatusCode(Map<String, String> responseMap) throws AntivirusException
 	{
+        if (logger.isDebugEnabled())
+            dumpResponseMap(responseMap);
+
 		String statusString = responseMap.get(STATUS_CODE);
 		if (!StringUtil.isNullEmptyOrBlank(statusString))
 		{
@@ -432,7 +448,8 @@ public class AntivirusClient
 						}
 						else
 						{
-							throw new AntivirusException("Could not get preview size from server");
+                            // The server did not return a Preview response header. Just use the configured stdPreviewSize.
+							logger.info( "No Preview size received from server. Using client setting: " + stdPreviewSize );
 						}
 						return true;
 					}
@@ -443,8 +460,15 @@ public class AntivirusClient
 						failureReason = new StringBuilder();
 						for (String key : responseMap.keySet())
 							if (key.startsWith("X-"))
+                            {
+                                if (failureReason.length() > 0)
+                                    failureReason.append(' ');
 								failureReason.append(key + ": " + responseMap.get(key));
-						logger.error("Infection found: " + failureReason.toString());
+                            }
+                        if (StringUtil.isNullEmptyOrBlank(failureReason.toString()))
+                        	logger.error("The ICAP server didn't return any information from the antivirus. The message was not scanned due to antivirus configuration.");
+						else
+							logger.error("Infection found: " + failureReason.toString());
 						return false;
 					}
 				case 204: //file is clean
