@@ -56,8 +56,8 @@ Enable the AV-scanning as a message attribute on a trading pickup
 6. Select **Add a new message processing action**.
 7. Create the condition that is required for the message handler processing action to execute. 
 The condition contains the attribute set on the trading pickup and click **Next**.
-8. Select as operator **Perform inline processing via a Java class**, use the following value in Class Name: **com.axway.antivirus.inlineprocessor.AntivirusProcessor** - if the configuration file (avScanner.properties) contains more than 1 scanner defined, give as parameter the scannerId from the scanner you want to use, otherwise, you can leave the Parameter field empty.
-Ex: 
+8. Select as operator **Perform inline processing via a Java class**, use the following value in Class Name: **com.axway.antivirus.inlineprocessor.AntivirusProcessor** - if the configuration file (avScanner.properties) contains more than 1 scanner defined, give as parameter the scannerId from the scanner you want to use, otherwise, you can leave the Parameter field empty. Ex: 
+
 ![Enable the AV-scanning](dist/screenshots/Inline_Processing_With_Parameter.jpg)
 ![Enable the AV-scanning](dist/screenshots/avScanner.properties_Example.jpg)
 
