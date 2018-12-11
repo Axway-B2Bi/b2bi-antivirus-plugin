@@ -3,7 +3,6 @@ package com.axway.antivirus.configuration;
 import com.axway.antivirus.configuration.util.ConfigUtil;
 import com.axway.antivirus.exceptions.AntivirusException;
 import com.axway.antivirus.inlineprocessor.AntivirusProcessor;
-import com.axway.util.StringUtil;
 
 import org.apache.log4j.Logger;
 
@@ -18,6 +17,7 @@ public class AntivirusConfigurationManager
 	private static final Logger logger = Logger.getLogger(AntivirusConfigurationManager.class);
 	private static volatile AntivirusConfigurationManager instance;
 	private static Map<String, AntivirusConfigurationHolder> avServersConfig = new HashMap<>();
+	private static String scannerId;
 	private static Boolean isConfLoaded = false;
 
 	private AntivirusConfigurationManager()
@@ -55,9 +55,9 @@ public class AntivirusConfigurationManager
 	 * @param pathToFile The file path for the configuration file
 	 * @return An instance of the AntivirusConfigurationHolder
 	 **/
-	public AntivirusConfigurationHolder getScannerConfiguration(String pathToFile, String scannerId)
+	public AntivirusConfigurationHolder getScannerConfiguration(String pathToFile)
 	{
-		if (isConfLoaded() && !StringUtil.isNullEmptyOrBlank(scannerId) && avServersConfig.size() > 0)
+		if (isConfLoaded() && avServersConfig.size() > 0)
 			return avServersConfig.get(scannerId);
 		else
 		{
@@ -66,17 +66,16 @@ public class AntivirusConfigurationManager
 				logger.info("Scanner configuration not present or modified - attempting to load it.");
 				readScannerConfiguration(pathToFile);
 				setConfLoaded(true);
-				logger.info("Scanner configuration successfully loaded. Available scannerIds: " + avServersConfig.keySet().toString() );
+				logger.info("Scanner configuration successfully loaded.");
+				if (logger.isDebugEnabled())
+					logger.debug(avServersConfig.get(scannerId).toString());
 			}
 			catch (AntivirusException e)
 			{
 				logger.error("Didn't manage to load scanner configuration." + e.getMessage());
 				return null;
 			}
-			if (!StringUtil.isNullEmptyOrBlank(scannerId))
-				return avServersConfig.get(scannerId);
-			else
-				return avServersConfig.get(avServersConfig.keySet().iterator().next());
+			return avServersConfig.get(scannerId);
 		}
 	}
 
@@ -101,6 +100,7 @@ public class AntivirusConfigurationManager
 					List<PropertyKey> missingProperties = configUtil.validateAndGetInvalidList(properties);
 					if (missingProperties.isEmpty())
 					{
+						scannerId = id;
 						AntivirusConfigurationHolder antivirusConfigurationHolder = new AntivirusConfigurationHolder(id, properties);
 						avServersConfig.put(id, antivirusConfigurationHolder);
 					}
@@ -123,9 +123,10 @@ public class AntivirusConfigurationManager
 						}
 						else
 						{
+							scannerId = id;
 							Properties validKeysFromProperties = configUtil.validateAndGetValidList(properties);
 							AntivirusConfigurationHolder avConfHolder = new AntivirusConfigurationHolder(id, validKeysFromProperties);
-							avServersConfig.put(id, avConfHolder);
+							avServersConfig.put(scannerId, avConfHolder);
 
 							if (missingMandatoryWithDefaults.contains(PropertyKey.MAX_FILE_SIZE))
 							{

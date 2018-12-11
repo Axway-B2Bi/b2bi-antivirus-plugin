@@ -38,17 +38,16 @@ public class ConfigUtilTest
 	public void getIdsTest()
 	{
 		Set<String> ids = configUtil.getIDs();
-		assertEquals(2, ids.size());
+		assertEquals(1, ids.size());
 		assertTrue(ids.contains("antivirusID"));
-		assertTrue(ids.contains("antivirusID2"));
 	}
 
 	@Test
 	public void getKeyValuePairsByIdTest()
 	{
 		Map<String, Properties> keyValuePairsById = configUtil.getKeyValuePairsById();
-		assertEquals(2, keyValuePairsById.keySet().size());
-		assertEquals(15, keyValuePairsById.get("antivirusID").size());
+		assertEquals(1, keyValuePairsById.keySet().size());
+		assertEquals(15, keyValuePairsById.get(keyValuePairsById.keySet().iterator().next()).size());
 	}
 
 	@Test

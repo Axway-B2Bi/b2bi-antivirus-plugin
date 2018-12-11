@@ -26,7 +26,7 @@ public class ValidateConfigurationTest
 		pathToGeneratedConfFile = new PropertyFileUtils().getPathToGeneratedFile();
 		avConfManager = AntivirusConfigurationManager.getInstance();
 		avConfManager.setConfLoaded(false);
-		avConfHolder = avConfManager.getScannerConfiguration(new PropertyFileUtils().getPathToTemplateFile(),"antivirusID");
+		avConfHolder = avConfManager.getScannerConfiguration(new PropertyFileUtils().getPathToTemplateFile());
 	}
 
 	@After
@@ -42,7 +42,7 @@ public class ValidateConfigurationTest
 		PropertyFileUtils propUtil = new PropertyFileUtils();
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "hostname", "");
 		avConfManager.setConfLoaded(false);
-		assertNull(avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID"));
+		assertNull(avConfManager.getScannerConfiguration(propFile.getCanonicalPath()));
 	}
 
 	@Test
@@ -51,7 +51,7 @@ public class ValidateConfigurationTest
 		PropertyFileUtils propUtil = new PropertyFileUtils();
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "port", "");
 		avConfManager.setConfLoaded(false);
-		assertNull(avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID"));
+		assertNull(avConfManager.getScannerConfiguration(propFile.getCanonicalPath()));
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class ValidateConfigurationTest
 		PropertyFileUtils propUtil = new PropertyFileUtils();
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "service", "");
 		avConfManager.setConfLoaded(false);
-		assertNull(avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID"));
+		assertNull(avConfManager.getScannerConfiguration(propFile.getCanonicalPath()));
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class ValidateConfigurationTest
 		PropertyFileUtils propUtil = new PropertyFileUtils();
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "ICAPServerVersion", "");
 		avConfManager.setConfLoaded(false);
-		assertNull(avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID"));
+		assertNull(avConfManager.getScannerConfiguration(propFile.getCanonicalPath()));
 	}
 
 	@Test
@@ -79,7 +79,7 @@ public class ValidateConfigurationTest
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "previewSize", "");
 		avConfManager.setConfLoaded(false);
 		//If not set, the default value <1024> is used
-		assertEquals(1024, avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID").getPreviewSize());
+		assertEquals(1024, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getPreviewSize());
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class ValidateConfigurationTest
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "stdSendLength", "");
 		avConfManager.setConfLoaded(false);
 		//If not set, the default value <8192> is used
-		assertEquals(8192, avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID").getStdSendLength());
+		assertEquals(8192, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getStdSendLength());
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class ValidateConfigurationTest
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "stdReceiveLength", "");
 		avConfManager.setConfLoaded(false);
 		//If not set, the default value <8192> is used
-		assertEquals(8192, avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID").getStdReceiveLength());
+		assertEquals(8192, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getStdReceiveLength());
 	}
 
 	@Test
@@ -109,7 +109,7 @@ public class ValidateConfigurationTest
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "connectionTimeout", "");
 		avConfManager.setConfLoaded(false);
 		//if no connection timeout is specified, the default value <10000> is returned
-		assertEquals(10000, avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID").getConnectionTimeout());
+		assertEquals(10000, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getConnectionTimeout());
 	}
 
 	@Test
@@ -119,7 +119,7 @@ public class ValidateConfigurationTest
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "rejectFileOnError", "");
 		avConfManager.setConfLoaded(false);
 		//if no value is specified, the default value <true> is returned
-		assertEquals(true, avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID").isRejectFileOnError());
+		assertEquals(true, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).isRejectFileOnError());
 	}
 
 	@Test
@@ -129,7 +129,7 @@ public class ValidateConfigurationTest
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "scanFromIntegrator", "");
 		avConfManager.setConfLoaded(false);
 		//if no value is specified, the default value <false> is returned
-		assertEquals(false, avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID").isScanFromIntegrator());
+		assertEquals(false, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).isScanFromIntegrator());
 	}
 
 	@Test
@@ -139,7 +139,7 @@ public class ValidateConfigurationTest
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "maxFileSize", "");
 		avConfManager.setConfLoaded(false);
 		//if no value is specified, the default value <-1> is returned
-		assertEquals(-1, avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID").getMaxFileSize());
+		assertEquals(-1, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getMaxFileSize());
 	}
 
 	@Test
@@ -148,7 +148,7 @@ public class ValidateConfigurationTest
 		PropertyFileUtils propUtil = new PropertyFileUtils();
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "fileNameRestriction", "");
 		avConfManager.setConfLoaded(false);
-		assertEquals(0, avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID").getFilenameRestrictions().size());
+		assertEquals(0, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getFilenameRestrictions().size());
 	}
 
 	@Test
@@ -157,7 +157,7 @@ public class ValidateConfigurationTest
 		PropertyFileUtils propUtil = new PropertyFileUtils();
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "fileExtensionRestriction", "");
 		avConfManager.setConfLoaded(false);
-		assertEquals(0, avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID").getFileExtensionRestriction().size());
+		assertEquals(0, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getFileExtensionRestriction().size());
 	}
 
 	@Test
@@ -166,7 +166,7 @@ public class ValidateConfigurationTest
 		PropertyFileUtils propUtil = new PropertyFileUtils();
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "protocolRestriction", "");
 		avConfManager.setConfLoaded(false);
-		assertEquals(0, avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID").getProtocolRestrictions().size());
+		assertEquals(0, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getProtocolRestrictions().size());
 	}
 
 	@Test
@@ -175,7 +175,7 @@ public class ValidateConfigurationTest
 		PropertyFileUtils propUtil = new PropertyFileUtils();
 		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "partnerNameRestriction", "");
 		avConfManager.setConfLoaded(false);
-		assertEquals(0, avConfManager.getScannerConfiguration(propFile.getCanonicalPath(), "antivirusID").getRestrictedPartners().size());
+		assertEquals(0, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getRestrictedPartners().size());
 	}
 
 }

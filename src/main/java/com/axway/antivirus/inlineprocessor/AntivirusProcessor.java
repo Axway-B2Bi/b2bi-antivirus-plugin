@@ -106,7 +106,7 @@ public class AntivirusProcessor implements MessageProcessor
 			}
 
 			//get the scanner  configuration
-			AntivirusConfigurationHolder avConfHolder = avManager.getScannerConfiguration(avScannerConfFilePath, scannerId);
+			AntivirusConfigurationHolder avConfHolder = avManager.getScannerConfiguration(avScannerConfFilePath);
 			if (avConfHolder == null)
 			{
 				message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.ERROR.getValue());
