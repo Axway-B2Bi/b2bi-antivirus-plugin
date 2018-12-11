@@ -31,11 +31,6 @@ Properties include filters that specify which files are not to be scanned, based
 * protocols
 * partners
 
-Multiple scanners can be defined in this file. Each scanner must have its own set of properties and a unique id.
-Ex: 
- 
-![Update the avScanner.properties file](dist/screenshots/Multiple_Scanners_Example.jpg)
-
 ### 3. Enable the AV-scanning
 The following procedures explain how to enable AV-scanning in a trading pickup as a message attribute and the inline-processor in a message handler processing action.
 Enable the AV-scanning as a message attribute on a trading pickup
@@ -56,11 +51,7 @@ Enable the AV-scanning as a message attribute on a trading pickup
 6. Select **Add a new message processing action**.
 7. Create the condition that is required for the message handler processing action to execute. 
 The condition contains the attribute set on the trading pickup and click **Next**.
-8. Select as operator **Perform inline processing via a Java class**, use the following value in Class Name: **com.axway.antivirus.inlineprocessor.AntivirusProcessor** - if the configuration file (avScanner.properties) contains more than 1 scanner defined, give as parameter the scannerId from the scanner you want to use, otherwise, you can leave the Parameter field empty. Ex: 
-
-![Enable the AV-scanning](dist/screenshots/Inline_Processing_With_Parameter.jpg)
-![Enable the AV-scanning](dist/screenshots/avScanner.properties_Example.jpg)
-
+8. Select as operator **Perform inline processing via a Java class** and use the following value in Class Name: **com.axway.antivirus.inlineprocessor.AntivirusProcessor**
 9. Click **Next**.
 10. Provide a friendly name and click **Finish**.
 
