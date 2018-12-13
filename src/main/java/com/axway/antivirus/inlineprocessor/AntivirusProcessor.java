@@ -26,8 +26,6 @@ public class AntivirusProcessor implements MessageProcessor
 	private static String avScannerConfFilePath = null;
 	private static AntivirusConfigurationManager avManager;
 
-    private String scannerId = ""; //Unless the inline processor is configured with a parameter, the inline will use the last scanner id it finds in the configuration file
-
 	private AntivirusClient client;
 
 	public enum SCAN_CODES
@@ -68,10 +66,7 @@ public class AntivirusProcessor implements MessageProcessor
 	@Override
 	public void setParameters(String parameters)
 	{
-        if(parameters != null && parameters.length() > 0)
-        {
-            this.scannerId = parameters;
-        }
+        //for future enhancements
 	}
 
 	@Override
@@ -111,7 +106,7 @@ public class AntivirusProcessor implements MessageProcessor
 			{
 				message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.ERROR.getValue());
 				message.setMetadata(AV_SCAN_INFO, "Antivirus configuration file is corrupt; check logs for more details.");
-				logger.error("Antivirus configuration file is corrupt (requested scannerId: " + scannerId + "); message will be rejected.");
+				logger.error("Antivirus configuration file is corrupt; message will be rejected.");
 				return;
 			}
 			//print in the te log the configuration used for this message
