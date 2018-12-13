@@ -78,6 +78,8 @@ public class AntivirusConfigurationWatcher implements Runnable
 						// Overflow event
 						if (StandardWatchEventKinds.OVERFLOW == kind)
 						{
+							if (logger.isDebugEnabled())
+								logger.debug("An OVERFLOW event happened.");
 							continue; // loop
 						}
 						else if (StandardWatchEventKinds.ENTRY_MODIFY == kind
@@ -102,9 +104,9 @@ public class AntivirusConfigurationWatcher implements Runnable
 				}
 				if (isFileModified())
 				{
-					setFileModified(false);
 					AntivirusConfigurationManager.setConfLoaded(false);
 					AntivirusConfigurationManager.getInstance().getScannerConfiguration(AntivirusProcessor.getAvScannerConfFilePath());
+					setFileModified(false);
 				}
 			}
 		}

@@ -23,6 +23,7 @@ public class ConfigUtil
 {
 	private static final Logger logger = Logger.getLogger(ConfigUtil.class);
 	private Properties properties;
+	int retries = 5;
 
 	/**
 	 * Instantiates the ConfigUtil object and gets all properties from the configuration file
@@ -90,13 +91,20 @@ public class ConfigUtil
 		{
 			Properties props = new Properties();
 			props.load(is);
+			if (props.size() == 0 && retries > 0)
+			{
+				retries--;
+				logger.error("Error reading the avScanner.properties file. Retrying ...");
+				Thread.sleep(1000);
+				props = getPropertiesFromFile(file);
+			}
 			return props;
 		}
-		catch (IOException ioe)
+		catch (IOException | InterruptedException ex)
 		{
 			String message =
-				"Error while loading properties from file \"" + propFile.getAbsolutePath() + "\" (" + ioe + ").";
-			logger.error(message, ioe);
+				"Error while loading properties from file \"" + propFile.getAbsolutePath() + "\" (" + ex + ").";
+			logger.error(message, ex);
 			throw new IllegalArgumentException(message);
 		}
 	}

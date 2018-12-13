@@ -66,9 +66,17 @@ public class AntivirusConfigurationManager
 				logger.info("Scanner configuration not present or modified - attempting to load it.");
 				readScannerConfiguration(pathToFile);
 				setConfLoaded(true);
-				logger.info("Scanner configuration successfully loaded.");
-				if (logger.isDebugEnabled())
-					logger.debug(avServersConfig.get(scannerId).toString());
+				if (avServersConfig.get(scannerId) != null)
+				{
+					logger.info("Scanner configuration successfully loaded.");
+					if (logger.isDebugEnabled())
+						logger.debug(avServersConfig.get(scannerId).toString());
+				}
+				else
+				{
+					logger.error("Something went wrong when reading the scanner configuration. Please verify the properties file.");
+					setConfLoaded(false);
+				}
 			}
 			catch (AntivirusException e)
 			{
