@@ -1,3 +1,7 @@
+// Copyright Axway Software, All Rights Reserved.
+// Please refer to the file "LICENSE" for further important copyright
+// and licensing information.  Please also refer to the documentation
+// for additional copyright notices.
 package com.axway.antivirus.inlineprocessor;
 
 import com.axway.antivirus.configuration.AntivirusConfigurationHolder;
@@ -19,7 +23,7 @@ import static com.axway.antivirus.configuration.Constants.FS;
 
 public class AntivirusProcessor implements MessageProcessor
 {
-	private static final Logger logger = Logger.getLogger(AntivirusProcessor.class.getName());
+	private static final Logger logger = Logger.getLogger(AntivirusProcessor.class);
 	public static final String AV_SCAN_STATUS = "AVScanStatus";
 	public static final String AV_SCAN_INFO = "AVScanInfo";
 
@@ -80,21 +84,18 @@ public class AntivirusProcessor implements MessageProcessor
 			if (message == null || message.getData() == null || message.getData().length() == 0)
 				return;
 
-			logger.info(
-				"Inline processor AntivirusProcessor BEGIN (Thread ID = " + Thread.currentThread().getId() + ")");
+			logger.info("Inline processor AntivirusProcessor BEGIN (Thread ID = " + Thread.currentThread().getId() + ")");
 
-			//print the message size in the te log
-			long messageLength = message.getData().length();
-			logger.info("Message size: " + messageLength);
+			if (logger.isDebugEnabled())
+			{
+				//print the message size in the te log
+				logger.debug("Message size: " + message.getData().length());
+			}
 
-			//print in the te log from which pickup  the message was sent to the inline processor
-			logger.info(
-				"Message sent to the AntivirusProcessor through: \"" + message.getMetadata("PickupName") + "\" pickup");
+			logger.info("Message sent to the AntivirusProcessor through: \"" + message.getMetadata("PickupName") + "\" pickup");
 
-			// Create a temporary file containing the message content
 			File temp = message.getData().toFile();
 
-			//get the configuration manager instance
 			if (null == avManager)
 			{
 				avManager = AntivirusConfigurationManager.getInstance();
@@ -109,16 +110,19 @@ public class AntivirusProcessor implements MessageProcessor
 				logger.error("Antivirus configuration file is corrupt; message will be rejected.");
 				return;
 			}
-			//print in the te log the configuration used for this message
-			logger.info("Antivirus configuration: " + avConfHolder.toString());
+
+			if (logger.isDebugEnabled())
+			{
+				//print in the te log the configuration used for this message
+				logger.debug("Antivirus configuration: " + avConfHolder.toString());
+			}
 
 			rejectFileOnError = avConfHolder.isRejectFileOnError();
 
 			//Get the direction metadata from the message
 			//if the direction is internal the message comes from integrator
 			//if the property (scanFromIntegrator) is not set to true (in the configuration file), we should not scan the file
-			String direction = message.getMetadata("Direction");
-			if ("Internal".equalsIgnoreCase(direction) && !avConfHolder.isScanFromIntegrator())
+			if ("Internal".equalsIgnoreCase( message.getMetadata("Direction")) && !avConfHolder.isScanFromIntegrator())
 			{
 				logger.info("Property scanFromIntegrator is set to false, the message received from Integrator will not be scanned.");
 				return;
@@ -127,12 +131,23 @@ public class AntivirusProcessor implements MessageProcessor
 			//check all restrictions from the configuration file and decide if the file should be scanned by the antivirus
 			ScanDecider scanDecider = new ScanDecider(avConfHolder);
 			if (!scanDecider.isValidForScanning(message))
+			{
+				logger.info("The message will not be scanned due to the restrictions added in the configuration file.");
 				return;
+			}
 
 			//instantiate the ICAP client based on the scanner configuration
 			if (null == client)
 			{
-				client = new AntivirusClient(avConfHolder.getHostname(), avConfHolder.getPort(), avConfHolder.getService(), avConfHolder.getICAPServerVersion(), avConfHolder.getPreviewSize(), avConfHolder.getStdReceiveLength(), avConfHolder.getStdSendLength(), avConfHolder.getConnectionTimeout());
+				client = new AntivirusClient(
+					avConfHolder.getHostname(),
+					avConfHolder.getPort(),
+					avConfHolder.getService(),
+					avConfHolder.getICAPServerVersion(),
+					avConfHolder.getPreviewSize(),
+					avConfHolder.getStdReceiveLength(),
+					avConfHolder.getStdSendLength(),
+					avConfHolder.getConnectionTimeout());
 			}
 
 			//connect to the ICAP client and ask server for OPTIONS
@@ -180,7 +195,7 @@ public class AntivirusProcessor implements MessageProcessor
 		catch (Exception ex)
 		{
 
-			logger.error("Other error while processing file " + ": " + ex.getMessage());
+			logger.error("Other error while processing file: " + ex.getMessage());
 			message.setMetadata(AV_SCAN_STATUS, SCAN_CODES.ERROR.getValue());
 			if (rejectFileOnError)
 			{

@@ -1,3 +1,7 @@
+// Copyright Axway Software, All Rights Reserved.
+// Please refer to the file "LICENSE" for further important copyright
+// and licensing information.  Please also refer to the documentation
+// for additional copyright notices.
 package com.axway.antivirus.tools;
 
 import com.axway.antivirus.configuration.AntivirusConfigurationHolder;
@@ -5,11 +9,13 @@ import com.axway.antivirus.inlineprocessor.AntivirusProcessor;
 import com.axway.antivirus.providers.ExchangePointProvider;
 import com.axway.util.StringUtil;
 import com.cyclonecommerce.api.inlineprocessing.Message;
+import com.cyclonecommerce.collaboration.MetadataDictionary;
 import com.cyclonecommerce.collaboration.Party;
 import com.cyclonecommerce.collaboration.partyconfiguration.PartyManagerFactory;
 import com.cyclonecommerce.collaboration.transport.ExchangePoint;
 import com.cyclonecommerce.collaboration.transport.ExchangePointManager;
 
+import static com.axway.antivirus.inlineprocessor.AntivirusProcessor.AV_SCAN_INFO;
 import static com.axway.antivirus.inlineprocessor.AntivirusProcessor.AV_SCAN_STATUS;
 
 import org.apache.log4j.Logger;
@@ -20,7 +26,7 @@ import org.apache.log4j.Logger;
 public class ScanDecider
 {
 
-	private static final Logger logger = Logger.getLogger(AntivirusProcessor.class.getName());
+	private static final Logger logger = Logger.getLogger(ScanDecider.class);
 	private final ExchangePointProvider epProvider;
 	private final AntivirusConfigurationHolder avHolder;
 
@@ -60,8 +66,11 @@ public class ScanDecider
 	 **/
 	public Boolean isValidForScanning(Message message)
 	{
-		return isMessageSizeValid(message) && isFileNameValid(message) && isFileExtensionValid(message)
-			&& isBusinessProtocolValid(message) && isPartnerNameValid(message);
+		return isMessageSizeValid(message)
+			&& isFileNameValid(message)
+			&& isFileExtensionValid(message)
+			&& isBusinessProtocolValid(message)
+			&& isPartnerNameValid(message);
 	}
 
 	/**
@@ -78,8 +87,19 @@ public class ScanDecider
 		if (avHolder.getMaxFileSize() > 0 && messageLength > avHolder.getMaxFileSize())
 		{
 			if (logger.isDebugEnabled())
-				logger.debug("Message size is grater than the restriction added in configuration file. Message will not be scanned.");
-			message.setMetadata(AV_SCAN_STATUS, AntivirusProcessor.SCAN_CODES.NOTSCANNED.getValue());
+				logger.debug("Message size is greater than the restriction added in configuration file. Message will not be scanned.");
+			if (avHolder.isRejectFileOverMaxSize())
+			{
+				message.setMetadata(AV_SCAN_STATUS, AntivirusProcessor.SCAN_CODES.ERROR.getValue());
+				message.setMetadata(AV_SCAN_INFO, "Message was not scanned due to the antivirus processor configuration. File size is greater than the maxFileSize value.");
+				message.setMetadata(MetadataDictionary.SHOULD_NOT_DISPLAY_VIEW_AND_DOWNLOAD_LINKS, "true");
+				logger.error("Message size is greater than the restriction added in configuration file and the flag to reject files greater than the max file size is set to true. Message will be rejected.");
+
+			}
+			else
+			{
+				message.setMetadata(AV_SCAN_STATUS, AntivirusProcessor.SCAN_CODES.NOTSCANNED.getValue());
+			}
 			return false;
 		}
 		return true;

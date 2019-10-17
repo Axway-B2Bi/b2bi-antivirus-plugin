@@ -1,3 +1,7 @@
+// Copyright Axway Software, All Rights Reserved.
+// Please refer to the file "LICENSE" for further important copyright
+// and licensing information.  Please also refer to the documentation
+// for additional copyright notices.
 package com.axway.antivirus.configuration;
 
 import java.io.File;
@@ -81,6 +85,12 @@ public class Constants
 	 * <p>If a file has more bytes than the value set in 'maxFileSize' property it won't be scanned</p>
 	 */
 	public static final String SCANNER_CONFIGURATION_PROPERTY_MAX_FILE_SIZE = "maxFileSize";
+
+	/**
+	 * <code>SCANNERID.rejectFileOverMaxSize</code> property inside the avScanner.properties file
+	 * <p>If true, and a file has more bytes than the value set in 'maxFileSize' property, the message will be rejected</p>
+	 */
+	public static final String SCANNER_CONFIGURATION_PROPERTY_REJECT_OVER_MAX_FILE_SIZE = "rejectFileOverMaxSize";
 
 	/**
 	 * <code>SCANNERID.fileNameRestriction</code> property inside the avScanner.properties file

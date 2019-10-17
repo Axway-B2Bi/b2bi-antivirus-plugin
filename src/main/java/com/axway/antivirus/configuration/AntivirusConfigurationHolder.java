@@ -1,3 +1,7 @@
+// Copyright Axway Software, All Rights Reserved.
+// Please refer to the file "LICENSE" for further important copyright
+// and licensing information.  Please also refer to the documentation
+// for additional copyright notices.
 package com.axway.antivirus.configuration;
 
 import com.axway.util.StringUtil;
@@ -23,6 +27,7 @@ public class AntivirusConfigurationHolder
 	private boolean rejectFileOnError;
 	private boolean scanFromIntegrator;
 	private long maxFileSize;
+	private boolean rejectFileOverMaxSize;
 	private List<String> fileNameRestriction;
 	private List<String> fileExtensionRestriction;
 	private List<String> protocolRestriction;
@@ -41,6 +46,7 @@ public class AntivirusConfigurationHolder
 		setRejectFileOnError(Boolean.getBoolean(PropertyKey.REJECT_FILE_ON_ERROR.getDefaultValue()));
 		setScanFromIntegrator(Boolean.getBoolean(PropertyKey.SCAN_FROM_INTEGRATOR.getDefaultValue()));
 		setMaxFileSize(Integer.getInteger(PropertyKey.MAX_FILE_SIZE.getDefaultValue()));
+		setRejectFileOverMaxSize(Boolean.getBoolean(PropertyKey.REJECT_OVER_MAX_FILE_SIZE.getDefaultValue()));
 		setFilenameRestrictions(new ArrayList<String>());
 		setFileExtensionRestriction(new ArrayList<String>());
 		setProtocolRestrictions(new ArrayList<String>());
@@ -55,17 +61,18 @@ public class AntivirusConfigurationHolder
 	{
 		setScannerId(id);
 		setHostname(properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_HOSTNAME));
-		setPort(Integer.valueOf(properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_PORT)));
+		setPort(Integer.parseInt(properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_PORT)));
 		setService(properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_SERVICE));
 		setICAPServerVersion(properties.getProperty(Constants.SCANNER_CONFIGURATION_PROPERTY_ICAP_SERVER_VERSION));
 
-		setPreviewSize(Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_PREVIEW_SIZE)));
-		setStdReceiveLength(Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_RECEIVE_LENGTH)));
-		setStdSendLength(Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_SEND_LENGTH)));
-		setConnectionTimeout(Integer.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_CONNECTION_TIMEOUT)));
-		setRejectFileOnError(Boolean.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_REJECT_FILE_ON_ERROR)));
-		setScanFromIntegrator(Boolean.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_SCAN_FROM_INTEGRATOR)));
-		setMaxFileSize(Long.valueOf(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_MAX_FILE_SIZE)));
+		setPreviewSize(Integer.parseInt(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_PREVIEW_SIZE)));
+		setStdReceiveLength(Integer.parseInt(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_RECEIVE_LENGTH)));
+		setStdSendLength(Integer.parseInt(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_STANDARD_SEND_LENGTH)));
+		setConnectionTimeout(Integer.parseInt(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_CONNECTION_TIMEOUT)));
+		setRejectFileOnError(Boolean.parseBoolean(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_REJECT_FILE_ON_ERROR)));
+		setScanFromIntegrator(Boolean.parseBoolean(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_SCAN_FROM_INTEGRATOR)));
+		setMaxFileSize(Long.parseLong(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_MAX_FILE_SIZE)));
+		setRejectFileOverMaxSize(Boolean.parseBoolean((getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_REJECT_OVER_MAX_FILE_SIZE))));
 
 		setFilenameRestrictions(getRestrictionListOfValues(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_FILENAME_RESTRICTION)));
 		setFileExtensionRestriction(getRestrictionListOfValues(getPropertyOrDefaultValue(properties, Constants.SCANNER_CONFIGURATION_PROPERTY_FILE_EXTENSION_RESTRICTION)));
@@ -420,6 +427,26 @@ public class AntivirusConfigurationHolder
 	}
 
 	/**
+	 * Getter for the reject file over max size
+	 *
+	 * @return the reject file over max size
+	 */
+	public boolean isRejectFileOverMaxSize()
+	{
+		return rejectFileOverMaxSize;
+	}
+
+	/**
+	 * Setter for the reject file over max size
+	 *
+	 * @param rejectFileOverMaxSize flag to reject files over max size
+	 */
+	public void setRejectFileOverMaxSize(boolean rejectFileOverMaxSize)
+	{
+		this.rejectFileOverMaxSize = rejectFileOverMaxSize;
+	}
+
+	/**
 	 * Getter for the scan from integrator value
 	 *
 	 * @return The scan from integrator value
@@ -445,12 +472,24 @@ public class AntivirusConfigurationHolder
 	@Override
 	public String toString()
 	{
-		return "AntivirusConfigurationHolder{" + "scannerId='" + scannerId + '\'' + ", hostname='" + hostname + '\''
-			+ ", port=" + port + ", service='" + service + '\'' + ", ICAPServerVersion='" + ICAPServerVersion + '\''
-			+ ", previewSize=" + previewSize + ", stdReceiveLength=" + stdReceiveLength + ", stdSendLength="
-			+ stdSendLength + ", connectionTimeout=" + connectionTimeout + ", rejectFileOnError=" + rejectFileOnError
-			+ ", scanFromIntegrator=" + scanFromIntegrator + ", maxFileSize=" + maxFileSize + ", fileNameRestriction="
-			+ fileNameRestriction + ", fileExtensionRestriction=" + fileExtensionRestriction + ", protocolRestriction="
-			+ protocolRestriction + ", partnerNameRestriction=" + partnerNameRestriction + '}';
+		return "AntivirusConfigurationHolder {"
+			+ "scannerId=" + scannerId
+			+ ", hostname=" + hostname
+			+ ", port=" + port
+			+ ", service=" + service
+			+ ", ICAPServerVersion=" + ICAPServerVersion
+			+ ", connectionTimeout=" + connectionTimeout
+			+ ", previewSize=" + previewSize
+			+ ", stdReceiveLength=" + stdReceiveLength
+			+ ", stdSendLength=" + stdSendLength
+			+ ", rejectFileOnError="+ rejectFileOnError
+			+ ", scanFromIntegrator=" + scanFromIntegrator
+			+ ", maxFileSize=" + maxFileSize
+			+ ", rejectFileOverMaxSize=" + rejectFileOverMaxSize
+			+ ", fileNameRestriction=" + fileNameRestriction
+			+ ", fileExtensionRestriction=" + fileExtensionRestriction
+			+ ", protocolRestriction=" + protocolRestriction
+			+ ", partnerNameRestriction=" + partnerNameRestriction
+			+ '}';
 	}
 }

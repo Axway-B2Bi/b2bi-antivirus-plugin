@@ -16,7 +16,13 @@ import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import static com.axway.antivirus.inlineprocessor.AntivirusProcessor.AV_SCAN_INFO;
+import static com.axway.antivirus.inlineprocessor.AntivirusProcessor.AV_SCAN_STATUS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -121,7 +127,9 @@ public class AntivirusProcessorTest
 		final AntivirusConfigurationManager antivirusConfigurationManager = AntivirusConfigurationManager.getInstance();
 		PropertyFileUtils propertyFileUtils = new PropertyFileUtils();
 		String pathToTestFile = new PropertyFileUtils().getPathToGeneratedFile();
-		propertyFileUtils.makeFile(pathToTestFile, "scanFromIntegrator", "true");
+		Map<String, String> props = new HashMap<>();
+		props.put("scanFromIntegrator", "true");
+		propertyFileUtils.makeFile(pathToTestFile, props);
 		when(msgMock.getMetadata("Direction")).thenReturn("Internal");
 
 		InjectionUtils.injectField(antivirusProcessorScan, AntivirusProcessor.class, "client", avClientMock);
@@ -136,6 +144,46 @@ public class AntivirusProcessorTest
 		verify(msgMock, times(1)).setMetadata(metaNameCaptor.capture(), metaValueCaptor.capture());
 		PrepareForTests.assertOnList(metaNameCaptor.getAllValues(), "AVScanStatus");
 		PrepareForTests.assertOnList(metaValueCaptor.getAllValues(), AntivirusProcessor.SCAN_CODES.CLEAN.getValue());
+
+	}
+
+	@Test
+	public void noScanAndRejectOverMessageSizeTest() throws NoSuchFieldException, IllegalAccessException, IOException,
+		AntivirusException
+	{
+		final AntivirusProcessor antivirusProcessorScan = new AntivirusProcessor();
+		final AntivirusClient avClientMock = PrepareForTests.prepareClient(true, "");
+		final Message msgMock = PrepareForTests.prepareMessage(45L);
+		final AntivirusConfigurationManager antivirusConfigurationManager = AntivirusConfigurationManager.getInstance();
+		PropertyFileUtils propertyFileUtils = new PropertyFileUtils();
+		String pathToTestFile = new PropertyFileUtils().getPathToGeneratedFile();
+		Map<String, String> props = new HashMap<>();
+		props.put("maxFileSize", "2");
+		props.put("rejectFileOverMaxSize", "true");
+		propertyFileUtils.makeFile(pathToTestFile, props);
+		when(msgMock.getMetadata("Direction")).thenReturn("Outbound");
+
+		InjectionUtils.injectField(antivirusProcessorScan, AntivirusProcessor.class, "client", avClientMock);
+		InjectionUtils.injectField(antivirusProcessorScan, AntivirusProcessor.class, "avManager", antivirusConfigurationManager);
+		InjectionUtils.injectField(antivirusProcessorScan, AntivirusProcessor.class, "avScannerConfFilePath", pathToTestFile);
+		ArgumentCaptor<String> metaNameCaptor = ArgumentCaptor.forClass(String.class);
+		ArgumentCaptor<String> metaValueCaptor = ArgumentCaptor.forClass(String.class);
+		antivirusConfigurationManager.setConfLoaded(false);
+
+		antivirusProcessorScan.process(msgMock);
+
+		verify(msgMock, times(3)).setMetadata(metaNameCaptor.capture(), metaValueCaptor.capture());
+		List<String> metadataNames = new ArrayList<>();
+		metadataNames.add(AV_SCAN_STATUS);
+		metadataNames.add(AV_SCAN_INFO);
+		metadataNames.add(MetadataDictionary.SHOULD_NOT_DISPLAY_VIEW_AND_DOWNLOAD_LINKS);
+		List<String> metadataValues = new ArrayList<>();
+		metadataValues.add(AntivirusProcessor.SCAN_CODES.ERROR.getValue());
+		metadataValues.add("Message was not scanned due to the antivirus processor configuration. File size is greater than the maxFileSize value.");
+		metadataValues.add("true");
+		PrepareForTests.assertOnLists(metaNameCaptor.getAllValues(), metadataNames);
+		PrepareForTests.assertOnLists(metaValueCaptor.getAllValues(), metadataValues);
+		msgMock.getMetadata(AV_SCAN_INFO);
 
 	}
 

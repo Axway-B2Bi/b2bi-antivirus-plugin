@@ -55,7 +55,7 @@ public class PropertyFileUtils
 		return icapInputFilesFolderPath;
 	}
 
-	public File makeFile(String pathToFile, String property, String propertyValue) throws IOException
+	public File makeFile(String pathToFile, Map<String, String> propertiesKeyValueMap) throws IOException
 	{
 		File propsFile = new File(pathToFile);
 		Map<String, String> contents = new HashMap<>();
@@ -70,6 +70,7 @@ public class PropertyFileUtils
 		contents.put("rejectFileOnError", "antivirusID.rejectFileOnError=");
 		contents.put("scanFromIntegrator", "antivirusID.scanFromIntegrator=");
 		contents.put("maxFileSize", "antivirusID.maxFileSize=");
+		contents.put("rejectFileOverMaxSize", "antivirusID.rejectFileOverMaxSize=");
 		contents.put("fileNameRestriction", "antivirusID.fileNameRestriction=");
 		contents.put("fileExtensionRestriction", "antivirusID.fileExtensionRestriction=");
 		contents.put("protocolRestriction", "antivirusID.protocolRestriction=");
@@ -77,11 +78,11 @@ public class PropertyFileUtils
 
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(propsFile)));
 		for (Map.Entry<String, String> entry : contents.entrySet())
-			if (entry.getKey().equalsIgnoreCase(property))
+			if (propertiesKeyValueMap.keySet().contains(entry.getKey()))
 
 			{
 				writer.write(entry.getValue());
-				writer.write(propertyValue);
+				writer.write(propertiesKeyValueMap.get(entry.getKey()));
 				writer.newLine();
 			}
 			else
@@ -122,6 +123,9 @@ public class PropertyFileUtils
 						break;
 					case "maxFileSize":
 						writer.write(String.valueOf(avTemplateConfHolder.getMaxFileSize()));
+						break;
+					case "rejectFileOverMaxSize":
+						writer.write(String.valueOf(avTemplateConfHolder.isRejectFileOverMaxSize()));
 						break;
 					case "fileNameRestriction":
 						List<String> fileNameRestrictions = avTemplateConfHolder.getFilenameRestrictions();

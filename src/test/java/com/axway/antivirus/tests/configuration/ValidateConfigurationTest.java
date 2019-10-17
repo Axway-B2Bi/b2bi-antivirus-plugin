@@ -10,9 +10,13 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNull;
+import static org.junit.Assert.assertFalse;
 
 public class ValidateConfigurationTest
 {
@@ -40,7 +44,9 @@ public class ValidateConfigurationTest
 	public void noHostnameTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "hostname", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("hostname", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		assertNull(avConfManager.getScannerConfiguration(propFile.getCanonicalPath()));
 	}
@@ -49,7 +55,9 @@ public class ValidateConfigurationTest
 	public void noPortTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "port", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("port", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		assertNull(avConfManager.getScannerConfiguration(propFile.getCanonicalPath()));
 	}
@@ -58,7 +66,9 @@ public class ValidateConfigurationTest
 	public void noServiceTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "service", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("service", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		assertNull(avConfManager.getScannerConfiguration(propFile.getCanonicalPath()));
 	}
@@ -67,7 +77,9 @@ public class ValidateConfigurationTest
 	public void noICAPServerVersionTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "ICAPServerVersion", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("ICAPServerVersion", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		assertNull(avConfManager.getScannerConfiguration(propFile.getCanonicalPath()));
 	}
@@ -76,7 +88,9 @@ public class ValidateConfigurationTest
 	public void noPreviewSizeTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "previewSize", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("previewSize", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		//If not set, the default value <1024> is used
 		assertEquals(1024, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getPreviewSize());
@@ -86,7 +100,9 @@ public class ValidateConfigurationTest
 	public void noStdSendLengthTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "stdSendLength", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("stdSendLength", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		//If not set, the default value <8192> is used
 		assertEquals(8192, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getStdSendLength());
@@ -96,7 +112,9 @@ public class ValidateConfigurationTest
 	public void noStdReceiveLengthTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "stdReceiveLength", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("stdReceiveLength", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		//If not set, the default value <8192> is used
 		assertEquals(8192, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getStdReceiveLength());
@@ -106,7 +124,9 @@ public class ValidateConfigurationTest
 	public void noConnectionTimeoutTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "connectionTimeout", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("connectionTimeout", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		//if no connection timeout is specified, the default value <10000> is returned
 		assertEquals(10000, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getConnectionTimeout());
@@ -116,37 +136,57 @@ public class ValidateConfigurationTest
 	public void noRejectFileOnErrorValueTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "rejectFileOnError", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("rejectFileOnError", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		//if no value is specified, the default value <true> is returned
-		assertEquals(true, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).isRejectFileOnError());
+		assertTrue(avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).isRejectFileOnError());
 	}
 
 	@Test
 	public void noScanFromIntegratorValueTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "scanFromIntegrator", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("scanFromIntegrator", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		//if no value is specified, the default value <false> is returned
-		assertEquals(false, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).isScanFromIntegrator());
+		assertFalse(avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).isScanFromIntegrator());
 	}
 
 	@Test
 	public void noMaxFileSizeValueTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "maxFileSize", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("maxFileSize", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		//if no value is specified, the default value <-1> is returned
 		assertEquals(-1, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getMaxFileSize());
 	}
 
 	@Test
+	public void noRejectFileOverMaxSizeValueTest() throws IOException
+	{
+		PropertyFileUtils propUtil = new PropertyFileUtils();
+		Map<String, String> props = new HashMap<>();
+		props.put("rejectFileOverMaxSize", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
+		avConfManager.setConfLoaded(false);
+		//if no value is specified, the default value <false> is returned
+		assertFalse(avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).isRejectFileOverMaxSize());
+	}
+
+	@Test
 	public void noFileNameRestrictionTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "fileNameRestriction", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("fileNameRestriction", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		assertEquals(0, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getFilenameRestrictions().size());
 	}
@@ -155,7 +195,9 @@ public class ValidateConfigurationTest
 	public void noFileExtensionRestrictionTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "fileExtensionRestriction", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("fileExtensionRestriction", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		assertEquals(0, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getFileExtensionRestriction().size());
 	}
@@ -164,7 +206,9 @@ public class ValidateConfigurationTest
 	public void noProtocolRestrictionTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "protocolRestriction", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("protocolRestriction", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		assertEquals(0, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getProtocolRestrictions().size());
 	}
@@ -173,7 +217,9 @@ public class ValidateConfigurationTest
 	public void noPartnerRestrictionsTest() throws IOException
 	{
 		PropertyFileUtils propUtil = new PropertyFileUtils();
-		File propFile = propUtil.makeFile(pathToGeneratedConfFile, "partnerNameRestriction", "");
+		Map<String, String> props = new HashMap<>();
+		props.put("partnerNameRestriction", "");
+		File propFile = propUtil.makeFile(pathToGeneratedConfFile, props);
 		avConfManager.setConfLoaded(false);
 		assertEquals(0, avConfManager.getScannerConfiguration(propFile.getCanonicalPath()).getRestrictedPartners().size());
 	}

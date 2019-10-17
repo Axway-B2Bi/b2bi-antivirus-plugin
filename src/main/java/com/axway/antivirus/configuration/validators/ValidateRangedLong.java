@@ -1,3 +1,7 @@
+// Copyright Axway Software, All Rights Reserved.
+// Please refer to the file "LICENSE" for further important copyright
+// and licensing information.  Please also refer to the documentation
+// for additional copyright notices.
 package com.axway.antivirus.configuration.validators;
 
 public class ValidateRangedLong implements ValidationStrategy
@@ -9,7 +13,6 @@ public class ValidateRangedLong implements ValidationStrategy
 	 * @param minValue The minimum value a long input can have
 	 * @param maxValue The maximum value a long input can have
 	 */
-
 	public ValidateRangedLong(long minValue, long maxValue)
 	{
 		this.minSize = minValue;

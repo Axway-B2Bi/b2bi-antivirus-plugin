@@ -47,7 +47,7 @@ public class ConfigUtilTest
 	{
 		Map<String, Properties> keyValuePairsById = configUtil.getKeyValuePairsById();
 		assertEquals(1, keyValuePairsById.keySet().size());
-		assertEquals(15, keyValuePairsById.get(keyValuePairsById.keySet().iterator().next()).size());
+		assertEquals(16, keyValuePairsById.get(keyValuePairsById.keySet().iterator().next()).size());
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class ConfigUtilTest
 		propertyNamesNotIncluded.add("protocolRestriction");
 		Properties properties = makeProperties(propertyNamesNotIncluded);
 		Properties validPropertyList = configUtil.validateAndGetValidList(properties);
-		assertEquals(13, validPropertyList.size());
+		assertEquals(14, validPropertyList.size());
 	}
 
 	@Test
@@ -122,6 +122,7 @@ public class ConfigUtilTest
 		properties.put("rejectFileOnError", "true");
 		properties.put("scanFromIntegrator", "false");
 		properties.put("maxFileSize", "600000");
+		properties.put("rejectFileOverMaxSize", "false");
 		properties.put("fileNameRestriction", "filename1.txt");
 		properties.put("fileExtensionRestriction", "jpg,pdf");
 		properties.put("protocolRestriction", "AS2,PGP,RAW");

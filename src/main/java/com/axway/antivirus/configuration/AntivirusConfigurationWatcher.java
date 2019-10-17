@@ -1,3 +1,7 @@
+// Copyright Axway Software, All Rights Reserved.
+// Please refer to the file "LICENSE" for further important copyright
+// and licensing information.  Please also refer to the documentation
+// for additional copyright notices.
 package com.axway.antivirus.configuration;
 
 import com.axway.antivirus.inlineprocessor.AntivirusProcessor;
@@ -19,7 +23,7 @@ import static com.axway.antivirus.configuration.Constants.FS;
 
 public class AntivirusConfigurationWatcher implements Runnable
 {
-	private static final Logger logger = Logger.getLogger(AntivirusConfigurationWatcher.class.getName());
+	private static final Logger logger = Logger.getLogger(AntivirusConfigurationWatcher.class);
 	private static WatchService watchService;
 	private static AntivirusConfigurationWatcher avWatcherInstance;
 	private boolean isFileModified = false;

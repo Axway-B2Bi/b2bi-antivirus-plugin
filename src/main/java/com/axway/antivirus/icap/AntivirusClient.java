@@ -21,7 +21,7 @@ import static java.util.Arrays.copyOfRange;
 
 public class AntivirusClient
 {
-	private static final Logger logger = Logger.getLogger(AntivirusClient.class.getName());
+	private static final Logger logger = Logger.getLogger(AntivirusClient.class);
 	private static final Charset StandardCharsetsUTF8 = Charset.forName("UTF-8");
 	private static final String STATUS_CODE = "StatusCode";
 	private static final String USERAGENT = "B2Bi ICAP Client - 1.0";
@@ -86,7 +86,7 @@ public class AntivirusClient
 		//Initialize connection
 		if ((client = new Socket(this.hostname, port)) == null)
 		{
-			throw new AntivirusException("Could not open socket connection.");
+			throw new AntivirusException("Could not open socket connection, please check ICAP server connection.");
 		}
 		//set the connection timeout
 		client.setSoTimeout(this.connectionTimeout);
@@ -425,7 +425,8 @@ public class AntivirusClient
 			switch (statusCode)
 			{
 				case 100: //Continue transfer for the rest of the file
-					logger.info(SERVER_RESPONSE + statusCode + " - continue transfer.");
+					if (logger.isDebugEnabled())
+						logger.debug(SERVER_RESPONSE + statusCode + " - continue transfer.");
 					return true;
 				case 200:
 					//if the response contains the "Method" key it means it's a response for an OPTIONS request
@@ -434,7 +435,8 @@ public class AntivirusClient
 					//if they don't exists it means that the file was sent but the antivirus didn't actually scan it
 					if (responseMap.containsKey("Methods"))
 					{
-						logger.info(SERVER_RESPONSE + statusCode + " received for get OPTIONS method");
+						if (logger.isDebugEnabled())
+							logger.debug(SERVER_RESPONSE + statusCode + " received for get OPTIONS method");
 						String tempString = responseMap.get("Preview");
 						if (tempString != null)
 						{
@@ -442,9 +444,8 @@ public class AntivirusClient
 							//the preview size will be set from the server or from the configuration file only if it is smaller than what the server returned
 							if (this.stdPreviewSize > serverPreviewSize)
 								this.stdPreviewSize = serverPreviewSize;
-							logger.info(
-								"Preview size received from server: " + serverPreviewSize + ". Using preview size: "
-									+ stdPreviewSize);
+							if (logger.isDebugEnabled())
+								logger.debug("Preview size received from server: " + serverPreviewSize + ". Using preview size: " + stdPreviewSize);
 						}
 						else
 						{
@@ -455,8 +456,8 @@ public class AntivirusClient
 					}
 					else
 					{
-						logger.info(SERVER_RESPONSE + statusCode
-							+ " - request successfully processed by server, checking for threats...");
+						if (logger.isDebugEnabled())
+							logger.debug(SERVER_RESPONSE + statusCode + " - request successfully processed by server, checking for threats...");
 						failureReason = new StringBuilder();
 						for (String key : responseMap.keySet())
 							if (key.startsWith("X-"))
@@ -472,7 +473,8 @@ public class AntivirusClient
 						return false;
 					}
 				case 204: //file is clean
-					logger.info(SERVER_RESPONSE + statusCode + " - file is clean.");
+					if (logger.isDebugEnabled())
+						logger.debug(SERVER_RESPONSE + statusCode + " - file is clean.");
 					return true;
 				case 400:
 					throw new AntivirusException("400: Bad request");

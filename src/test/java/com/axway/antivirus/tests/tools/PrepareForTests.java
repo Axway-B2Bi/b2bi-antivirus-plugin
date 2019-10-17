@@ -42,7 +42,15 @@ public class PrepareForTests
 	public static AntivirusClient prepareRealClient()
 	{
 		AntivirusConfigurationHolder avConfHolder = new PropertyFileUtils().getAvConfHolderFromTemplate();
-		AntivirusClient antivirusClient = new AntivirusClient(avConfHolder.getHostname(), avConfHolder.getPort(), avConfHolder.getService(), avConfHolder.getICAPServerVersion(), avConfHolder.getPreviewSize(), avConfHolder.getStdReceiveLength(), avConfHolder.getStdSendLength(), avConfHolder.getConnectionTimeout());
+		AntivirusClient antivirusClient = new AntivirusClient(
+			avConfHolder.getHostname(),
+			avConfHolder.getPort(),
+			avConfHolder.getService(),
+			avConfHolder.getICAPServerVersion(),
+			avConfHolder.getPreviewSize(),
+			avConfHolder.getStdReceiveLength(),
+			avConfHolder.getStdSendLength(),
+			avConfHolder.getConnectionTimeout());
 
 		return antivirusClient;
 	}
@@ -53,6 +61,15 @@ public class PrepareForTests
 		for (int i = 0; i < retrievedValues.size(); i++)
 		{
 			assertEquals(expectedValues[i], retrievedValues.get(i));
+		}
+	}
+
+	public static void assertOnLists(final List<String> retrievedValues, List<String>  expectedValues)
+	{
+		assertEquals(retrievedValues.size(), expectedValues.size());
+		for (int i = 0; i < retrievedValues.size(); i++)
+		{
+			assertEquals(expectedValues.get(i), retrievedValues.get(i));
 		}
 	}
 }

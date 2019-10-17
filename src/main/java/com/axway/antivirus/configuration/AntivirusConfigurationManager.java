@@ -1,3 +1,7 @@
+// Copyright Axway Software, All Rights Reserved.
+// Please refer to the file "LICENSE" for further important copyright
+// and licensing information.  Please also refer to the documentation
+// for additional copyright notices.
 package com.axway.antivirus.configuration;
 
 import com.axway.antivirus.configuration.util.ConfigUtil;
@@ -140,6 +144,11 @@ public class AntivirusConfigurationManager
 							{
 								missingRestrictionFields.add(PropertyKey.MAX_FILE_SIZE);
 								missingMandatoryWithDefaults.remove(PropertyKey.MAX_FILE_SIZE);
+							}
+							if (missingMandatoryWithDefaults.contains(PropertyKey.REJECT_OVER_MAX_FILE_SIZE))
+							{
+								missingRestrictionFields.add(PropertyKey.REJECT_OVER_MAX_FILE_SIZE);
+								missingMandatoryWithDefaults.remove(PropertyKey.REJECT_OVER_MAX_FILE_SIZE);
 							}
 							if (!missingMandatoryWithDefaults.isEmpty()) //  mandatory that have default values
 							{

@@ -92,6 +92,12 @@ public class ReadConfigurationTest
 	}
 
 	@Test
+	public void rejectFileOverMaxSizeTest()
+	{
+		assertEquals(false, avHolder.isRejectFileOverMaxSize());
+	}
+
+	@Test
 	public void fileNameRestrictionTest()
 	{
 		assertTrue(avHolder.getFilenameRestrictions().contains("filename1.txt"));

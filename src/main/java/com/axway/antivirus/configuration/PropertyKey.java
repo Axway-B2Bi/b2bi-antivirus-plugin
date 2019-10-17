@@ -1,3 +1,7 @@
+// Copyright Axway Software, All Rights Reserved.
+// Please refer to the file "LICENSE" for further important copyright
+// and licensing information.  Please also refer to the documentation
+// for additional copyright notices.
 package com.axway.antivirus.configuration;
 
 import com.axway.antivirus.configuration.validators.ValidateBoolean;
@@ -22,7 +26,8 @@ public enum PropertyKey
 	CONNECTION_TIMEOUT(Constants.SCANNER_CONFIGURATION_PROPERTY_CONNECTION_TIMEOUT, new ValidateRangedInteger(0,Integer.MAX_VALUE),"10000"),
 	REJECT_FILE_ON_ERROR(Constants.SCANNER_CONFIGURATION_PROPERTY_REJECT_FILE_ON_ERROR, new ValidateBoolean(),"true"),
 	SCAN_FROM_INTEGRATOR(Constants.SCANNER_CONFIGURATION_PROPERTY_SCAN_FROM_INTEGRATOR, new ValidateBoolean(),"false"),
-	MAX_FILE_SIZE(Constants.SCANNER_CONFIGURATION_PROPERTY_MAX_FILE_SIZE, new ValidateRangedLong(0,Long.MAX_VALUE),"-1"),
+	MAX_FILE_SIZE(Constants.SCANNER_CONFIGURATION_PROPERTY_MAX_FILE_SIZE, new ValidateRangedLong(0,Integer.MAX_VALUE),"-1"),
+	REJECT_OVER_MAX_FILE_SIZE(Constants.SCANNER_CONFIGURATION_PROPERTY_REJECT_OVER_MAX_FILE_SIZE, new ValidateBoolean(), "false"),
 	FILENAME_RESTRICTION(Constants.SCANNER_CONFIGURATION_PROPERTY_FILENAME_RESTRICTION),
 	PROTOCOL_RESTRICTION(Constants.SCANNER_CONFIGURATION_PROPERTY_PROTOCOL_RESTRICTION),
 	FILE_EXTENSION_RESTRICTION(Constants.SCANNER_CONFIGURATION_PROPERTY_FILE_EXTENSION_RESTRICTION),

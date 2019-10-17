@@ -15,6 +15,8 @@ import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
@@ -23,11 +25,11 @@ import static org.mockito.Mockito.when;
 
 public class ScanDeciderTest
 {
-	private ScanDecider setUp(String property, String value, ExchangePointProvider ep) throws IOException
+	private ScanDecider setUp(Map<String, String> keyValueProps, ExchangePointProvider ep) throws IOException
 	{
 		final PropertyFileUtils propertyFileUtils = new PropertyFileUtils();
 		String pathToTestFile = new PropertyFileUtils().getPathToGeneratedFile();
-		propertyFileUtils.makeFile(pathToTestFile, property, value);
+		propertyFileUtils.makeFile(pathToTestFile, keyValueProps);
 		AntivirusConfigurationManager.getInstance().setConfLoaded(false);
 		final AntivirusConfigurationHolder antivirusConfigurationHolder = AntivirusConfigurationManager.getInstance().getScannerConfiguration(pathToTestFile);
 		if (null == ep)
@@ -46,7 +48,9 @@ public class ScanDeciderTest
 	@Test
 	public void messageSizeRestrictionTest() throws IOException
 	{
-		final ScanDecider scanDecider = setUp("maxFileSize", "63000", null);
+		Map<String,String> keyValueProps = new HashMap<>();
+		keyValueProps.put("maxFileSize", "63000");
+		final ScanDecider scanDecider = setUp(keyValueProps, null);
 		final Message mockMessage = PrepareForTests.prepareMessage(66000L);
 		ArgumentCaptor<String> metaNameCaptor = ArgumentCaptor.forClass(String.class);
 		ArgumentCaptor<String> metaValueCaptor = ArgumentCaptor.forClass(String.class);
@@ -61,7 +65,9 @@ public class ScanDeciderTest
 	@Test
 	public void fileNameRestrictionTest() throws IOException
 	{
-		final ScanDecider scanDecider = setUp("fileNameRestriction", "test_filename.txt", null);
+		Map<String,String> keyValueProps = new HashMap<>();
+		keyValueProps.put("fileNameRestriction", "test_filename.txt");
+		final ScanDecider scanDecider = setUp(keyValueProps, null);
 		final Message mockMessage = PrepareForTests.prepareMessage(66L);
 		when(mockMessage.getMetadata("ConsumptionFilename")).thenReturn("test_filename.txt");
 		ArgumentCaptor<String> metaNameCaptor = ArgumentCaptor.forClass(String.class);
@@ -77,7 +83,9 @@ public class ScanDeciderTest
 	@Test
 	public void fileExtensionRestrictionTest() throws IOException
 	{
-		final ScanDecider scanDecider = setUp("fileExtensionRestriction", "txt", null);
+		Map<String,String> keyValueProps = new HashMap<>();
+		keyValueProps.put("fileExtensionRestriction", "txt");
+		final ScanDecider scanDecider = setUp(keyValueProps, null);
 		final Message mockMessage = PrepareForTests.prepareMessage(66L);
 		when(mockMessage.getMetadata("ConsumptionFilenameExtension")).thenReturn(".txt");
 		ArgumentCaptor<String> metaNameCaptor = ArgumentCaptor.forClass(String.class);
