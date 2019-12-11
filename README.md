@@ -26,6 +26,7 @@ The anti-virus inline processor requires the Av-scanning properties to be config
 Properties include filters that specify which files are not to be scanned, based on criteria such as:
 
 * max file size
+* reject file over max size
 * file extensions 
 * file names
 * protocols
